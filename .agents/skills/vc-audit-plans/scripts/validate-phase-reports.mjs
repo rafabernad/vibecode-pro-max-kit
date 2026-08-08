@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Validates that every completed phase in an umbrella plan has its report file on disk.
-// Arg = umbrella/program plan path. Parse `## Program Status Table` (or
-// `## Phase Ordering`) for phases marked complete/VERIFIED. For each, resolve its
-// report path from `## Durable Report Destinations` and FAIL unless the file exists.
+// Audits whether completed phases in an umbrella plan have their report files on disk.
+// Missing report destinations/files are warning-level findings by default: a phase can
+// still have durable evidence in its plan, validate-contract, or task-folder artefacts
+// even when a dedicated phase report was not written yet.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -12,6 +12,10 @@ const warnings = [];
 
 function fail(message) {
   failures.push(message);
+}
+
+function warn(message) {
+  warnings.push(message);
 }
 
 function exists(absOrRel) {
@@ -61,7 +65,7 @@ if (!target) {
   // 2. Parse the Durable Report Destinations table: phase -> report path.
   const destBody = sectionBody(text, /^##\s+Durable Report Destinations/i);
   if (destBody === null) {
-    fail(`${target} missing '## Durable Report Destinations' section`);
+    warn(`${target} missing '## Durable Report Destinations' section`);
   }
 
   if (statusBody !== null && destBody !== null) {
@@ -87,14 +91,14 @@ if (!target) {
     for (const p of completePhases) {
       const reportPath = destMap.get(p);
       if (!reportPath) {
-        fail(`${target} Phase ${p} marked complete but has no Durable Report Destination entry`);
+        warn(`${target} Phase ${p} marked complete but has no Durable Report Destination entry`);
         continue;
       }
       // Report path may be repo-relative or relative to the umbrella folder.
       const repoRel = exists(reportPath);
       const umbrellaRel = fs.existsSync(path.resolve(umbrellaDir, reportPath));
       if (!repoRel && !umbrellaRel) {
-        fail(`${target} Phase ${p} report file missing on disk: ${reportPath}`);
+        warn(`${target} Phase ${p} report file missing on disk: ${reportPath}`);
       }
     }
   }

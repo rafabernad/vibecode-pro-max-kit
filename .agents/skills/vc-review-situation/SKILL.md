@@ -52,8 +52,8 @@ Run the scan **plus** read umbrella plan, latest phase report, and all active-pl
 **Deep mode steps:**
 1. Run `review-situation-scan.cjs` as normal (get branch state + active plan list)
 2. If a phase program is active: read the umbrella plan in full — especially `## Current Execution State` and `## Phase Ordering`
-3. Read the most recent phase report in full (if it exists)
-4. If 3+ phases are completed: read the Forward Preview sections from earlier phase reports
+3. Read the most recent phase report in full only when it exists and is relevant to the active phase/program summary
+4. If 3+ phases are completed: read only the Forward Preview sections that are upstream inputs to the active phase, not every earlier report by default
 5. For each active plan: read the `## Resume and Execution Handoff` section
 6. Synthesize: "You are at Phase N of M. Phase N-1 completed with these outputs. The next phase needs to know: X. These are the open gaps from prior phases: Y."
 

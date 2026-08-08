@@ -15,6 +15,10 @@ metadata:
 
 Reusable loop primitive. Runs: find gaps → write report → fix → check → repeat.
 
+Anti-ceremony guard: this skill is for bounded iterative hardening where repeated loops are
+actually justified by product/runtime gaps or a named metric target. It is NOT the default way
+to "be thorough", and it must not be used to elaborate process artefacts for their own sake.
+
 Used directly for spec/doc/UX hardening. Wired into PVL (plan-validate-fix loop — the fix cycle between writing a plan and approving EXECUTE) and EVL (execute-validate-fix loop — the confirmation run after EXECUTE) as the shared bookkeeping layer.
 
 ---
@@ -26,6 +30,16 @@ Used directly for spec/doc/UX hardening. Wired into PVL (plan-validate-fix loop 
 - **EVL:** the ORCHESTRATOR invokes it at the EVL confirmation run — unconditionally after every EXECUTE DONE, before UPDATE PROCESS
 
 Do NOT invoke during RESEARCH or INNOVATE phases.
+
+Do NOT invoke when any of these are true:
+
+- the task is still in first-pass implementation and no real validation loop has started yet
+- the only findings are plan-formatting, wording, or other process-only gaps with no product/runtime consequence
+- one bounded fix batch is the obvious next action and no iteration evidence suggests a loop is needed
+
+If the first investigation pass produces only OBSERVATION-level or process-only findings, stop with
+one concise summary and recommended next action. Do not create loop artefacts just to preserve a
+record of a loop that never meaningfully began.
 
 ## Who Runs This (Loop Driver)
 
@@ -39,6 +53,15 @@ The **ORCHESTRATOR is the loop driver**. It executes every bookkeeping step itse
 Subagents (vc-validate-agent, vc-tester, vc-plan-agent, vc-execute-agent) are fire-and-forget: they emit a verdict and terminate. They cannot invoke this skill on the orchestrator's behalf, cannot loop themselves, and cannot spawn each other.
 
 If no one runs Step 0, the loop never exists and verdicts silently become "proceed" — that failure mode is exactly what this section forbids.
+
+Step 0 is only legal after the loop driver can name the concrete reason the loop exists:
+
+- a failing or conditional validation gate affecting shipped behavior,
+- a failing confirmation test gate,
+- or an explicit measurable target (`verify:` + `target:`).
+
+Without one of those anchors, do not initialize `results.tsv`, do not emit iteration reports, and
+do not widen the task into autoresearch.
 
 Per-verdict routing tables: `process/development-protocols/orchestration.md` §PVL/EVL Loop Routing.
 
@@ -101,9 +124,10 @@ _* harness full config: .claude/skills/vc-autoresearch/domains/harness.md_
 ### Step 0 — Setup
 
 1. Parse parameters, apply domain defaults for any missing values
-2. If `auto_run:` not set and NOT under `/goal`: prompt once — "Auto-run (no pauses) or confirm before each fix batch?" Choice is sticky for the full loop.
-3. Create task folder: `process/features/{feature}/active/{task_slug}_{dd-mm-yy}/`
-4. Initialize TSV at `{task_folder}/results.tsv` with header row and baseline row (iteration 0, gaps_found: TBD, loop_status: baseline)
+2. Confirm the loop trigger is real and concrete: failing gate, conditional gate affecting behavior, or explicit metric target. If not, abort the loop and return a one-pass summary instead.
+3. If `auto_run:` not set and NOT under `/goal`: prompt once — "Auto-run (no pauses) or confirm before each fix batch?" Choice is sticky for the full loop.
+4. Create task folder: `process/features/{feature}/active/{task_slug}_{dd-mm-yy}/`
+5. Initialize TSV at `{task_folder}/results.tsv` with header row and baseline row (iteration 0, gaps_found: TBD, loop_status: baseline)
 
 ### Step 1 — Research
 
@@ -148,6 +172,15 @@ every iteration is uniquely named no matter how many run.
 ONE FILE PER ITERATION — hard rule. NEVER append iterations to a single rolling file
 (no `ITERATION-NOTES.md`, no shared `{task_slug}_REPORT_*.md` updated in place). The
 rolling cross-iteration view is `results.tsv`, nothing else.
+
+Keep these reports terse and evidence-bearing. They should record:
+
+- what concrete gap blocked progress,
+- what changed in this iteration,
+- what command or gate outcome moved,
+- and what still remains.
+
+Do not expand them into narrative process diaries.
 
 Append a row to `{task_folder}/results.tsv`.
 
