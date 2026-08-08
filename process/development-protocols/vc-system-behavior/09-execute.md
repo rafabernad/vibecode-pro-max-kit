@@ -81,6 +81,15 @@ Confirm execution strategy for this plan (sequential vs parallel vs workflow vs 
 
 Read: Touchpoints, Public Contracts, Blast Radius, Verification Evidence, Resume Handoff, and `## Validate Contract`. Extract test gate commands from the validate-contract. Use exact commands — never invent them.
 
+Before trusting any gate as proof of implementation, classify it:
+
+- `product behavior`
+- `integration/runtime`
+- `harness/process`
+- `artifact/certification`
+
+Only the first two classes can prove that developed software behavior is done. The last two may prove helper integrity only.
+
 ---
 
 ## Skills During Implementation
@@ -122,6 +131,8 @@ For each plan section:
   1. Implement section per checklist items
   2. Read test gates from ## Validate Contract (EXACT commands — never invent)
   3. Run fully-automated tier gates for this section
+     - If a gate is harness/process or artifact/certification only, record it as helper integrity evidence, not section-completion proof.
+     - If all available gates for a developed behavior section are harness/process or artifact/certification tests, the section is NOT archivable; record a backlog test-building stub for missing behavior coverage.
   4. GREEN → mark section complete ✓ → move to next section
   5. RED → identify root cause → fix → re-run → repeat
   6. After 3 attempts OR structurally impossible:
@@ -327,6 +338,7 @@ Before reporting any exit code, execute-agent must:
 2. Flag any deviation, no matter how minor. Include: file path / what differs / rationale.
 3. Re-read the plan's `## Session Goal`. Compare what was implemented against what the user actually wanted. Ask: "Based on the Session Goal, what does the user truly want to see? What is missing?" Surface any delta as a deviation before reporting DONE.
 4. Also check delivered work against the **SPEC's acceptance criteria** (the SPEC is the upstream product-discovery requirements doc that drives this plan). For each acceptance criterion, confirm whether the implemented work satisfies it; surface any unmet criterion as a deviation before reporting DONE.
+5. Confirm no developed behavior is being justified solely by harness/process or artifact/certification tests. If that happened, classify it as not-archivable and create a backlog test-building stub instead of implying the feature is proven.
 
 ---
 

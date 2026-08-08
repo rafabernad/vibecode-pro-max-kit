@@ -38,17 +38,29 @@ Signal patterns that trigger this skill:
 
 Do not invoke for a simple one-session feature or a small bug fix. Use the normal RIPER flow instead.
 
+Do not invoke from these signals alone:
+
+- a large or strategic prompt
+- a repo-wide audit or stabilization request
+- a request framed as "multi-agent" or "act as a team"
+- a broad future-state architecture description
+
+Admission rule:
+
+If the repo still presents one obvious bounded first tranche, stay in the normal single-plan lane and implement that tranche first. This skill is for proven multi-checkpoint programs, not for broad prompts.
+
 ---
 
 ## Kickoff Procedure
 
 Before creating any plan files, follow these steps in order:
 
-**Step 1 — invoke `vc-agent-strategy-compare`.**
-For programs with 3 or more phases, output will always recommend parallel-subagents (one per phase
-plan) or dynamic workflow. Plans are created in the recommended parallel mode, not sequentially.
+**Step 1 — decide whether strategy comparison is needed.**
+Invoke `vc-agent-strategy-compare` only when there is a real choice about parallelism, phase ownership,
+or execution topology. If the kickoff obviously resolves to a single bounded lane, skip strategy
+comparison and keep the program sequential.
 
-**Per-phase strategy invocation (mandatory):** For each individual phase during scaffold, invoke `vc-agent-strategy-compare` with that phase's scope before writing that phase's plan stub — not once at the program level. Each phase may have a different recommended execution strategy.
+**Per-phase strategy invocation (conditional):** For each phase during scaffold, invoke `vc-agent-strategy-compare` only if that phase has a real parallelism or topology decision. Do not run it mechanically for every phase stub.
 
 **Step 1a — Read template files.**
 Before creating any plan artifacts, execute `Read` on both template files:
@@ -65,6 +77,12 @@ program. Understand the full problem space before proposing any structure.
 **Step 3 — emit a kickoff recommendation (stop for approval before creating files).**
 Present the recommendation using the format in "Kickoff Recommendation Format" below. Do not create
 plan artifacts yet. Stop and wait for user approval.
+
+Kickoff constraint:
+
+- The recommendation must prefer the minimum viable process shape.
+- If a normal single plan would safely unlock implementation, explicitly recommend against a phase program.
+- Do not create follow-up artifacts "just in case".
 
 **Step 4 — after approval, create the required artifacts:**
 - feature folder under `process/features/{feature}/` with subdirs `active/`, `completed/`, `backlog/` (no `reports/` or `references/` — new repos omit these deprecated sibling dirs)

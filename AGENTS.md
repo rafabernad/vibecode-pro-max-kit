@@ -125,6 +125,7 @@ Key Requirements:
 Auto-Detection Patterns:
 
 - Feature requests -> Step 0 skill discovery -> vc-research-agent -> SPEC -> INNOVATE -> PLAN -> VALIDATE -> EXECUTE
+- Broad implementation, audit, stabilization, or refactor requests with one obvious high-leverage first tranche -> quick bounded tranche lane: RESEARCH -> compact PLAN -> EXECUTE
 - Questions -> vc-research-agent for non-trivial investigation or direct answer for trivial conceptual questions
 - Trivial fixes -> vc-execute-agent directly with no plan required
 - Bug/debug -> vc-debugger as the default actor; helper skills like `vc-scout`, `vc-sequential-thinking`, and `vc-problem-solving` may assist
@@ -143,6 +144,24 @@ Large program rule:
   research subagent -> execution approval -> execute subagent -> validate subagent -> durable report/context update.
 - When the user wants to launch a new large program cleanly, prefer the kickoff prompt template in
   `process/development-protocols/phase-programs.md` rather than freehanding the structure.
+
+Anti-ceremony guard:
+
+- Do not infer a phase program from prompt breadth, strategic language, or "act as a multi-agent team" phrasing alone.
+- Default to the smallest execution shape that can produce repo evidence and working code in the current session.
+- A broad architecture prompt still starts as one bounded implementation lane unless the work truly requires 3+ independently executable checkpoints with different proof boundaries.
+- "Multi-agent" selects execution strategy, not documentation volume. It does not by itself justify umbrella plans, per-phase stubs, or repeated meta-validation.
+- Before creating any artifact beyond one active plan, ask: "What concrete implementation decision or unblock does this artifact create right now?" If the answer is "none", do not create it.
+- When the user wants implementation on the current repo, prefer: inspect -> identify the first high-leverage tranche -> plan that tranche -> execute. Do not expand into program-management work unless the user explicitly asks for staged governance.
+
+Quick bounded tranche lane:
+
+- Use this lane when the request is broader than a quick fix but still has one clearly bounded first tranche that can be implemented and verified now.
+- Default shape: RESEARCH -> compact PLAN -> EXECUTE.
+- SPEC is optional in this lane. Skip it when the tranche boundary, user-facing goal, and acceptance checks are already concrete enough to capture directly in the plan.
+- INNOVATE is optional in this lane. Run it only when there is a real design choice; skip it when the tranche has one obvious implementation path.
+- Artifact budget: one active plan only, no umbrella plan, no phase stubs, no durable report scaffolding beyond what execution actually needs.
+- Exit condition: finish the tranche, report what was completed, and recommend the next tranche without auto-promoting the work into a phase program.
 
 Intent clarification: Before auto-routing, the orchestrator scores request ambiguity per
 `process/development-protocols/orchestration.md` §Intent Clarification. Clear requests (score 0-1) auto-route
@@ -602,6 +621,8 @@ EXECUTE -> UPDATE PROCESS:
 **Parallel Fan-Out**
 
 At each phase transition above, invoke `vc-agent-strategy-compare` for the next phase's strategy recommendation. See `process/development-protocols/orchestration.md` for the checkpoint summary.
+
+Use strategy comparison only when the next phase has a real parallelism decision, cost/risk tradeoff, or unclear ownership boundary. Do not run it mechanically when the next step is obviously a single bounded implementation lane.
 
 ## Key Principles
 

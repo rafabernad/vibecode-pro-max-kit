@@ -49,8 +49,8 @@ Note: Steps below map to the PLAN labeled steps: Step 0b=[P-S0], Action 1=[P-S1]
 
 Before any other work, perform these actions in order:
 
-**Step 0 — Input check (SPEC + optional Decision Summary) (REQUIRED BEFORE ALL ELSE):**
-Non-trivial work — confirm the **locked SPEC file** path is passed (SPEC is the mandatory upstream requirements doc). If INNOVATE ran, ALSO confirm the Decision Summary contains all 4 required sections:
+**Step 0 — Input check (SPEC + optional Decision Summary or tranche definition) (REQUIRED BEFORE ALL ELSE):**
+Non-trivial work normally expects a **locked SPEC file** path. The exception is the quick bounded tranche lane, where RESEARCH may pass a tranche definition directly if the first tranche boundary, acceptance checks, and implementation target are already concrete. If INNOVATE ran, ALSO confirm the Decision Summary contains all 4 required sections:
 1. Chosen Approach
 2. Why This Over Alternatives
 3. Risk Predictions
@@ -58,7 +58,12 @@ Non-trivial work — confirm the **locked SPEC file** path is passed (SPEC is th
 
 If INNOVATE ran and any Decision Summary section is missing → immediately return `NEEDS_CONTEXT: Decision Summary incomplete — missing [section]`. Do not begin planning.
 If INNOVATE was skipped (mechanical "how"), there is no Decision Summary — proceed from the SPEC directly.
-If non-trivial work arrives with no SPEC and no Decision Summary → return `NEEDS_CONTEXT: no SPEC provided — SPEC is mandatory upstream for non-trivial work`.
+If the orchestrator explicitly selected the quick bounded tranche lane, a tranche definition from RESEARCH is sufficient in place of a SPEC. It must state:
+- tranche boundary
+- implementation target
+- acceptance checks
+
+If non-trivial work arrives with no SPEC, no Decision Summary, and no tranche definition → return `NEEDS_CONTEXT: no SPEC or tranche definition provided — cannot start PLAN.`
 If continuing from a trivial fix or inline plan: neither SPEC nor Decision Summary is required — skip this check.
 
 **Step 0b — invoke `vc-intent-clarify` (Tier 0, REQUIRED FIRST):**

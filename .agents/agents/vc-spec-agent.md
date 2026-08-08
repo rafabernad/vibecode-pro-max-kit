@@ -31,7 +31,7 @@ SPEC is a **product-discovery document**. It captures, in plain language, **what
 
 It is written for a **human reviewer**, not for an engineer. A non-technical stakeholder should be able to read a SPEC and understand: what changes for the user, how we will know it worked, and what we are deliberately not doing. No library names, no file paths, no schema decisions — those belong to later phases.
 
-SPEC is the bridge between **RESEARCH** (the facts we gathered) and **INNOVATE** (how we will build it). It turns research findings plus the user's stated intent into a written, reviewable statement of requirements. PLAN cannot start until a SPEC exists (for non-trivial work), and INNOVATE explores *how* to satisfy a SPEC that is already locked.
+SPEC is the bridge between **RESEARCH** (the facts we gathered) and **INNOVATE** (how we will build it). It turns research findings plus the user's stated intent into a written, reviewable statement of requirements. PLAN normally starts from a SPEC for non-trivial work, except for the quick bounded tranche lane where the first tranche may be concrete enough to lock directly in the plan.
 
 **SPEC consumes:** RESEARCH findings + the user's intent. **SPEC does NOT consume** a chosen approach or a Decision Summary — no approach has been chosen yet when SPEC runs. There is no Decision Summary at SPEC time and SPEC never expects one.
 
@@ -49,7 +49,7 @@ RESEARCH → SPEC → [INNOVATE] → PLAN → VALIDATE → EXECUTE → UPDATE PR
 - **INNOVATE** (bracketed = skippable) explores *how* to satisfy the SPEC.
 - **PLAN** turns the chosen "how" into concrete steps.
 
-For non-trivial work, SPEC always runs and INNOVATE is the optional phase. INNOVATE is skipped when the "how" is mechanical (one obvious path, no design choice); PLAN then proceeds straight from the SPEC. SPEC never depends on INNOVATE output — INNOVATE is downstream of SPEC.
+For most non-trivial work, SPEC runs and INNOVATE is the optional phase. In the quick bounded tranche lane, SPEC may be skipped when the tranche is already concrete enough to encode directly in the plan. INNOVATE is skipped when the "how" is mechanical (one obvious path, no design choice); PLAN then proceeds straight from the SPEC or tranche definition. SPEC never depends on INNOVATE output — INNOVATE is downstream of SPEC when SPEC is present.
 
 **Inner loop SKIPS SPEC.** In a phase program, SPEC runs **once** during the outer loop and governs every inner phase. The phase-program inner loop is `R → I → P → PVL → E → EVL → UP` and never writes a SPEC — the umbrella (program-level) SPEC written in the outer loop is the requirements doc for all phases. See `## Note: Inner Loop Skips SPEC` below.
 
@@ -57,7 +57,7 @@ For non-trivial work, SPEC always runs and INNOVATE is the optional phase. INNOV
 
 | Context | Skip? |
 |---|---|
-| General / top-level flow, non-trivial work | **Never skipped.** SPEC always runs for non-trivial work — it is the user-review checkpoint. (INNOVATE is the skippable phase, not SPEC.) |
+| General / top-level flow, non-trivial work | Default: runs. May be skipped only in the quick bounded tranche lane when RESEARCH already identified a concrete first tranche with clear acceptance checks. |
 | Phase program inner loop | Always skipped. The umbrella SPEC governs. |
 | Trivial fix (orchestrator-classified) | May be skipped when: single file, under 15 lines, no auth or billing surface, no new behavioral contract. |
 

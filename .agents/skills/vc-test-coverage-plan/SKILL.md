@@ -15,6 +15,30 @@ metadata:
 
 Generate a TDD-first full test plan per blast radius area. Assigns all 4 test tiers with exact commands, what each proves, what it does NOT prove, and explicit resolution options for every gap.
 
+## Evidence Class Policy
+
+Before proposing any test, classify it into exactly one evidence class:
+
+1. **Product behavior** — proves user-visible or contract-visible software behavior.
+2. **Integration/runtime** — proves interaction across real subsystems, runtime boundaries, or deployment surfaces.
+3. **Harness/process** — proves validators, reporters, evidence helpers, orchestration helpers, or other internal test machinery.
+4. **Artifact/certification** — proves emitted files, snapshots, inventories, hashes, or certification/publication records.
+
+Rules:
+
+- Only **product behavior** and **integration/runtime** tests may serve as primary proof that shipped software works.
+- **Harness/process** and **artifact/certification** tests never close a product acceptance criterion on their own.
+- Do not propose harness/process or artifact/certification tests by default for product work. Propose them only when the changed code is itself a shared validation/helper surface whose failure would corrupt many other checks.
+- If a proposed test can pass while the user-facing behavior remains broken, it is not a primary product test.
+- Every harness/process or artifact/certification test must name its owner surface and blast radius in one line: `Protects: [shared helper/pipeline] -> affects [what would break if wrong]`.
+
+Anti-patterns:
+
+- Hash/digest/inventory tests used as proof that a feature works.
+- Reporter/evidence aggregate tests counted as product validation.
+- Snapshot/certification fixtures added because they are easier than exercising runtime behavior.
+- Meta-validation growth where the system adds tests for its own process instead of for the product blast radius.
+
 ## Boundary vs vc-feasibility-test
 
 This skill is **POST-decision**: the design is already chosen and you are assigning
@@ -150,12 +174,14 @@ Areas with no coverage possible at any tier within this plan's scope:
 0. **Run Context Discovery (MANDATORY FIRST) above** — load the `all-tests.md` routing chain and discover existing blast-radius test files. If not loaded, emit `TIER_ASSIGNMENTS_BLOCKED` and STOP; do not continue.
 1. Read the plan file at the provided path (or parse the blast radius description if no path given).
 2. Extract the blast radius areas from the plan + the loaded test context — never infer commands/runners from training data.
-3. For each area, run the Test Tier Decision Waterfall.
-4. Flag any area that matches a High-Risk Class — enforce hybrid minimum.
-5. Produce the per-area test plan block (5-column table + gap resolution table).
-6. Produce the missing test areas table.
-7. If invoked during VALIDATE (Section III), embed output directly into the validate menu under "III. Test Coverage Plan" — do not write a separate file.
-8. If invoked during PLAN or EXECUTE, output directly in chat for the caller to copy into the plan file.
+3. For each area, first classify the proposed evidence rows by evidence class (product behavior / integration-runtime / harness-process / artifact-certification).
+4. For each area, run the Test Tier Decision Waterfall.
+5. Reject any area whose proposed coverage consists only of harness/process or artifact/certification tests while claiming to prove developed behavior. Re-classify that as a coverage gap and require a product/integration gate.
+6. Flag any area that matches a High-Risk Class — enforce hybrid minimum.
+7. Produce the per-area test plan block (5-column table + gap resolution table).
+8. Produce the missing test areas table.
+9. If invoked during VALIDATE (Section III), embed output directly into the validate menu under "III. Test Coverage Plan" — do not write a separate file.
+10. If invoked during PLAN or EXECUTE, output directly in chat for the caller to copy into the plan file.
 
 ## TDD Stub Output Requirement
 

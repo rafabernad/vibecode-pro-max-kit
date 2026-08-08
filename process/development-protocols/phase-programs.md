@@ -78,6 +78,23 @@ Prefer a phase program when any of these are true:
 Do not use this protocol for a simple one-session feature or a small bug fix. Use the normal RIPER
 flow instead.
 
+Anti-trigger clarifications:
+
+- Do not trigger a phase program from prompt size alone.
+- Do not trigger it just because the user asks for audit, stabilization, refactor, architecture, or broad non-functional improvement across a large surface.
+- Do not trigger it just because the user says "multi-agent", "team", or describes an ambitious future state.
+- If the current repo work still has one obvious first tranche that can be implemented and verified without staging 3+ separate checkpoints, stay in the normal single-plan lane.
+
+Admission heuristic:
+
+Choose a normal single plan unless the answer is clearly "yes" to all three:
+
+1. Are there at least 3 independently nameable checkpoints?
+2. Does each checkpoint require its own proof boundary before the next becomes safe?
+3. Would staged survivable governance help more than immediate bounded implementation?
+
+If any answer is "no" or "not yet proven from repo evidence", do not start a phase program.
+
 ## Core Model
 
 Treat the large effort as two layers:
@@ -144,6 +161,13 @@ Before execution begins:
 4. define what each phase green check proves
 5. define what remains out of scope even if the phase passes
 
+Process budget rule:
+
+- The setup sequence exists to unlock implementation, not to perfect the orchestration model.
+- Create the minimum durable structure that lets the next implementation tranche proceed safely.
+- Never create umbrella plans, phase plans, reports, RFCs, ADRs, and registries all at once unless each one has an immediate operational role.
+- If the first tranche is still being discovered, stop at the kickoff recommendation or a single active plan. Do not scaffold the whole program preemptively.
+
 Every phase plan should include:
 
 - objective
@@ -164,6 +188,12 @@ The 7 steps are: 1 RESEARCH → 2 INNOVATE → 3 PLAN-SUPPLEMENT → 4 PVL (vali
 
 This loop is mandatory. Do not jump straight from phase plan to implementation without a fresh
 research pass on large programs.
+
+Loop containment:
+
+- The loop is mandatory only after a phase program has been correctly admitted.
+- It is not a license to add extra nested loops, duplicate validation passes, or meta-documentation beyond what the current phase needs.
+- One PVL pass plus one focused fix/revalidate pass is the default. Escalate to heavier loop tooling only when a concrete blocker remains.
 
 ### Phase Loop Progress Shape (7-step inner loop — phase programs, authoritative)
 

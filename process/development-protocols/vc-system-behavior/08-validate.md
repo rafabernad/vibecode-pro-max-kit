@@ -16,6 +16,24 @@ metadata:
 
 The VALIDATE phase turns a written plan into an executable contract. It runs a loop called the Plan-Validate-Loop (PVL). The output is a `## Validate Contract` section written into the plan file.
 
+## Evidence Admissibility
+
+VALIDATE must distinguish between tests that prove software behavior and tests that only prove the validation machinery.
+
+Evidence classes:
+
+- **Product behavior** — direct proof of user-visible or contract-visible behavior.
+- **Integration/runtime** — proof of behavior across real runtime boundaries.
+- **Harness/process** — proof that validators, reporters, evidence helpers, or orchestration logic behave consistently.
+- **Artifact/certification** — proof that emitted files, snapshots, inventories, hashes, or certification records match an expected contract.
+
+Admissibility rules:
+
+- Only **product behavior** and **integration/runtime** evidence may satisfy product acceptance criteria or push a developed behavior area to PASS.
+- **Harness/process** and **artifact/certification** evidence may validate shared helper integrity, but they do not prove the product blast radius works.
+- If the planned gates for a developed behavior area are only harness/process or artifact/certification tests, the strongest possible verdict is CONDITIONAL.
+- A harness/process or artifact/certification test is allowed only when the changed code itself is a shared validation/helper surface and the contract being protected is explicitly named.
+
 ---
 
 ## Agent and Tools
@@ -238,6 +256,8 @@ vc-test-coverage-plan must run the full Part A context loading sequence (find te
 - No FAILs or CONCERNs → PASS
 
 **Hard E2E gate (every developed surface).** A clean PASS REQUIRES that EVERY developed surface (backend, container, browser, frontend) has comprehensive test scenarios across the 3 strategies, with a NAMED fully-automated E2E/integration scenario planned wherever that surface is automatable. "Passing E2E" here means the plan NAMES a real automated E2E scenario for the behavior, grounded in the test-context-discovery — it does NOT mean a green run at VALIDATE (VALIDATE runs nothing; green-confirmation is deferred to EXECUTE/EVL). If a contract's developed area is covered only by the weak tiers (agent-probe, known-gap — where automation was possible) — or by no planned gate at all ("vacuously green") — the strongest verdict it can earn for that area is CONDITIONAL, never PASS. Known-Gap is a rare justified residual only. The weak tiers (where automation was possible) and the "vacuously green" state (a validate-contract with zero planned fully-automated gates) are BANNED as terminal PASS states.
+
+**Meta-test ban for product proof.** Harness/process and artifact/certification tests do NOT satisfy the Hard E2E gate for developed behavior. A reporter test, evidence aggregate test, hash/snapshot verifier, or certification fixture may protect the harness, but it cannot stand in for a runtime/product gate.
 
 This is a **classification gate, not a /goal stop.** It changes how the work is classified (CONDITIONAL / not-archivable / keep in active-testing) and forces a test-building backlog stub; it never halts the program. Under a true /goal run the loop creates the test-building stub, classifies the developed work CONDITIONAL, and CONTINUES — it does not pause. Only the existing loop-control bounds (10-cycle cap, Cascade BLOCKED, blast-radius conflict) still surface. A developed surface with genuinely no automatable surface (rare, justified Known-Gap) is unaffected by this rule.
 

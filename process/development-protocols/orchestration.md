@@ -126,6 +126,53 @@ Chain subagents when work depends on prior outputs:
 
 Run in parallel only when scopes are independent and integration boundaries are clear.
 
+## Delivery-First Scoping
+
+The orchestrator must optimize for delivered implementation, not for maximal process completeness.
+
+Rules:
+
+1. Treat "multi-agent" as an execution tactic, not a reason to widen workflow ceremony.
+2. Do not upgrade a task into a phase program just because the prompt is broad, strategic, or asks for audit + stabilization + architecture.
+3. If the repo work can begin with one bounded tranche that yields concrete code, contracts, or tests in the current session, choose that tranche first.
+4. Before spawning any planning or validation layer beyond the first active plan, identify the concrete unblock it creates. If it does not unlock implementation, skip it.
+5. Do not create umbrella plans, phase stubs, or durable reports to "prepare" for work that has not yet been proven necessary by repo evidence.
+6. A request to "inspect first" means: inspect enough to choose the first implementation lane, not to build a full governance stack.
+7. Prefer one plan plus one execution lane over nested plan-on-plan structures unless the user explicitly asks for program management or the task has independently shippable checkpoints that cannot be safely combined.
+
+## Quick Bounded Tranche Lane
+
+This is the default lane for broad but still immediately actionable repo work that is too large for
+QUICK FIX and too early for a phase program.
+
+Use this lane when all of these are true:
+
+1. the request is broader than a tiny fix,
+2. one clearly bounded first tranche can be named from repo evidence,
+3. that tranche can produce concrete code, contracts, or tests in the current session,
+4. the work does not yet require 3+ independently governed checkpoints.
+
+Shape:
+
+- RESEARCH
+- compact PLAN
+- EXECUTE
+
+Lane rules:
+
+- The tranche must name a concrete scope boundary: files, components, package slice, service slice, or contract slice.
+- Produce at most one active plan artifact for the tranche.
+- SPEC is optional. Skip it when the tranche goal, scope boundary, and acceptance checks are already concrete enough to encode directly in the plan.
+- INNOVATE is optional. Use it only when the tranche has multiple viable implementation paths with meaningful tradeoffs.
+- VALIDATE should stay lightweight and plan-focused. Do not trigger outer-loop phase-program ceremony, umbrella artifacts, or repeated strategy scoring.
+- The closeout must recommend the next tranche explicitly, but the next tranche is not auto-created as a new plan unless needed immediately.
+
+Abort / escalate conditions:
+
+- If the tranche boundary cannot be made concrete after research, escalate to normal RESEARCH -> SPEC -> PLAN flow.
+- If implementation reveals 3+ independently governed checkpoints, escalate to a phase-program recommendation before widening scope.
+- If the tranche expands into high-risk surfaces or multiple unrelated feature areas, leave the lane and re-route.
+
 ## Large Project Phase Programs
 
 When a task is a large program rather than a normal single-plan feature, use
@@ -137,6 +184,29 @@ Signals:
 - repeated validation gates between milestones
 - multi-package or multi-runtime scope
 - the user explicitly wants durable phase-by-phase progress that survives compaction
+
+Non-signals (do NOT escalate on these alone):
+
+- the prompt contains a long strategic objective list
+- the prompt asks for strong architecture, governance, or contracts
+- the prompt says "act as a team" or "multi-agent"
+- the task is repo-wide but still has one obvious first implementation tranche
+- the user emphasizes quality attributes, non-functional requirements, or long-term maintainability
+
+Phase-program admission test:
+
+Promote to a phase program only when all three are true:
+
+1. there are at least 3 independently nameable checkpoints,
+2. each checkpoint has a distinct proof boundary that would be expensive or unsafe to merge into one pass,
+3. the user benefits more from staged survivable governance than from immediate bounded implementation.
+
+If any of the three is false, stay in the normal single-plan lane.
+
+Preference rule:
+
+When both a quick bounded tranche lane and a phase program appear plausible, prefer the tranche lane first.
+Escalate only after repo evidence proves the first tranche is not sufficient.
 
 Controller rules for phase programs:
 
@@ -154,6 +224,13 @@ Controller rules for phase programs:
    - inter-phase UPDATE PROCESS (archive phase, capture learnings)
    - move-on recommendation
 4. after each phase, update reports and downstream phase plans before advancing
+
+Bounded-loop rule:
+
+- Do not recursively create process around process. One kickoff recommendation is enough.
+- Do not run strategy-compare at every boundary by default; run it only when phase topology or parallelism is genuinely unclear.
+- Do not trigger `vc-autoresearch` for plan/test loops unless there is a measurable gap loop that cannot be closed in one normal validate/fix pass.
+- "Validation of validation" is forbidden. VALIDATE may update the plan; it may not create a second planning hierarchy unless a concrete blocker forces a scope split.
 
 **Compatibility note:** The 10-step loop above is the legacy orchestrator spawn-event view. The canonical 7-step inner loop (per phase) is defined in behavior-reference Section 8. Mapping:
 - Step 1 (research subagent) = Step 1 RESEARCH

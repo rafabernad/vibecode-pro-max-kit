@@ -210,7 +210,8 @@ Before ending the phase, present ONE consolidated recommendation block for the u
 
 - the findings summary (the named sections from the Exit Gate)
 - a recommended **next step** — mark the **recommended** one. The next step is NOT advance-only; it is one of:
-  - **advance** to SPEC (RESEARCH always hands off to SPEC for non-trivial work; SPEC turns these findings into a user-reviewable requirements doc). Skip straight to PLAN only for an orchestrator-classified trivial fix.
+  - **advance** to SPEC (default for non-trivial work when user-facing requirements still need to be locked in a reviewable artifact).
+  - **advance** to PLAN via the quick bounded tranche lane when the first tranche boundary, acceptance checks, and implementation target are already concrete from repo evidence. In this case RESEARCH must name the tranche explicitly.
   - **re-run RESEARCH** (loop back) when findings are insufficient — open questions remain unresolved, the user request still has un-clarified ambiguity, the blast radius grew during research, or a key library/behavior could not be confirmed. The recommendation must name the *specific gaps* driving the re-research and the *questions to ask the user* (these feed the next entry gate's clarification).
 - the recommended execution strategy for that next step — full 4-option suite with signal score (N/7) and cost estimates, with one option marked **recommended**
 - any optional deep work offered as a *choice*, not a separate pause (e.g. run `vc-validate-findings`)

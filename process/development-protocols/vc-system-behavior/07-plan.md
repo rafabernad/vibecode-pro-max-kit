@@ -19,8 +19,11 @@ The PLAN phase turns the requirements and the chosen "how" into a written plan a
 **PLAN has two input paths:**
 - **INNOVATE ran:** PLAN consumes the **Decision Summary** from INNOVATE (the chosen approach) on top of the locked SPEC.
 - **INNOVATE was skipped** (mechanical "how" — one obvious path, no design choice): PLAN consumes the **locked SPEC directly**; there is no Decision Summary.
+- **Quick bounded tranche lane:** PLAN consumes a tranche definition directly from RESEARCH when the first tranche boundary, acceptance checks, and implementation target are already concrete enough to encode without a separate SPEC.
 
-For non-trivial work the SPEC is always present upstream (it is the user-review checkpoint). Only orchestrator-classified trivial fixes have neither a SPEC nor a Decision Summary.
+For most non-trivial work the SPEC is present upstream. Exceptions:
+- orchestrator-classified trivial fixes
+- orchestrator-classified quick bounded tranche work with a concrete tranche definition from RESEARCH
 
 ---
 
@@ -43,11 +46,14 @@ These run before any planning work begins.
 Before everything else, confirm the right input is present for the path taken:
 
 - **Non-trivial work:** confirm the **locked SPEC file** is passed (its path is in the prompt). The SPEC is the mandatory upstream requirements doc.
+- **Quick bounded tranche lane:** a SPEC is not required if the prompt includes a tranche definition from RESEARCH with clear scope boundary, acceptance checks, and explicit implementation target.
 - **INNOVATE ran:** also confirm the incoming **Decision Summary** has all 4 sections — Chosen Approach / Why This Over Alternatives / Risk Predictions / Key Constraints Accepted. If any section is missing: return `NEEDS_CONTEXT: Decision Summary incomplete — missing [section]`. Do not start planning.
 - **INNOVATE was skipped** (mechanical "how"): there is no Decision Summary. PLAN proceeds from the SPEC directly — confirm the SPEC is present and skip the Decision Summary check.
 - **Trivial fix:** neither SPEC nor Decision Summary is required.
 
-If non-trivial work arrives with no SPEC and no Decision Summary: return `NEEDS_CONTEXT: no SPEC provided — SPEC is mandatory upstream for non-trivial work`.
+If non-trivial work arrives with no SPEC and no Decision Summary:
+- if a valid tranche definition is present from RESEARCH, continue in quick bounded tranche mode;
+- otherwise return `NEEDS_CONTEXT: no SPEC or tranche definition provided — cannot start PLAN.`
 
 **[P-S0] vc-intent-clarify**
 
@@ -102,6 +108,21 @@ Part A must run before Part B. Part A steps:
 If Part A was not completed: emit `TIER_ASSIGNMENTS_BLOCKED` and stop. Do not generate tier assignments from memory.
 
 When TIER_ASSIGNMENTS_BLOCKED fires, the plan-agent reports BLOCKED and routes back to RESEARCH to load the missing test chain. The plan-agent does not self-load it.
+
+**Evidence-class filter (required during drafting):**
+
+Before accepting any proposed gate into `## Verification Evidence`, classify it:
+
+- product behavior
+- integration/runtime
+- harness/process
+- artifact/certification
+
+Rules:
+
+- A developed behavior area must have at least one product behavior or integration/runtime proving gate wherever possible.
+- Harness/process and artifact/certification gates may be listed only as supporting integrity checks, never as the sole proof that developed behavior works.
+- If the only easy tests available are harness/process or artifact/certification checks, record that as a coverage gap rather than pretending the feature is proven.
 
 **Tier definitions:**
 
