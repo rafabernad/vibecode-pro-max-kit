@@ -312,54 +312,54 @@ Then wait for user approval before continuing.
 
 **Good**:
 ```
-User: "ENTER FAST MODE - add dark mode toggle"
+User: "ENTER FAST MODE - add status filters to the activity list"
 
 [MODE: FAST]
 
 **[RESEARCH]**
 Invoking vc-context-discovery... loading all-context.md routing...
-Invoking vc-review-situation... branch: main, no active plans for dark-mode
-Invoking vc-scout for "theme" and "dark mode"...
-Invoking vc-docs-seeker for Tailwind CSS v4 theme API...
+Invoking vc-review-situation... branch: main, no active plans for activity-filters
+Invoking vc-scout for "activity list", "filters", and "status"...
+Invoking vc-docs-seeker for list filtering patterns used by the current framework...
 
-Examining current theme setup:
-- Using Tailwind CSS v4
-- No existing theme system
-- Global CSS in apps/nextjs/src/app/globals.css
+Examining current list flow:
+- Existing activity list component present
+- Status values already exist in mock/API data
+- No current UI control for filtering by status
 
 [vc-agent-strategy-compare for SPEC: sequential recommended — single author, low complexity]
 
 **[SPEC]**
-SPEC: trivial — requirements locked: add a light/dark toggle that persists user preference across page refreshes; no system-preference sync in scope.
+SPEC: trivial — requirements locked: add a status filter control for the activity list; filtering is client-side; no saved preference in scope.
 
 [vc-agent-strategy-compare for INNOVATE: sequential recommended — single author, low complexity]
 
 **[INNOVATE]**
-Approach: CSS variables + localStorage persistence
-- Pros: Simple, no dependencies, standard pattern
-- Cons: No system preference sync (can add later)
+Approach: local list state + derived filtered rows
+- Pros: Simple, no dependencies, low blast radius
+- Cons: Filter state resets on refresh (acceptable for this scope)
 
-[vc-predict: 5 personas — no blocking risks; minor concern: SSR flash, mitigated by script tag]
+[vc-predict: 5 personas — no blocking risks; minor concern: empty-state UX, mitigated by explicit "no matches" state]
 
-Recommended: CSS variables + localStorage persistence for MVP
+Recommended: local list state + derived filtered rows for MVP
 
 [vc-agent-strategy-compare for PLAN: sequential recommended]
 
 **[PLAN]**
 Running date command: 01-12-25
 
-[vc-scenario for highest-risk items: persistence edge case, SSR flash, system preference conflict — mitigations added]
+[vc-scenario for highest-risk items: empty results, mixed statuses, reset behavior — mitigations added]
 
-Creating plan: process/general-plans/active/dark-mode-toggle_01-12-25/dark-mode-toggle_PLAN_01-12-25.md
+Creating plan: process/general-plans/active/activity-status-filters_01-12-25/activity-status-filters_PLAN_01-12-25.md
 
 [Writes complete plan file]
 
 IMPLEMENTATION CHECKLIST:
-1. Add theme CSS variables to globals.css
-2. Create theme context in app/providers/theme-provider.tsx
-3. Create toggle component at app/components/theme-toggle.tsx
-4. Add toggle to navigation
-5. Test theme persistence across page refreshes
+1. Add filter state and derived rows to the activity list container
+2. Create a filter control component for available statuses
+3. Render filtered results and explicit empty state
+4. Add test coverage for default, filtered, and no-results views
+5. Verify the filter interaction manually in the target screen
 
 [vc-agent-strategy-compare for VALIDATE: sequential recommended]
 
@@ -385,23 +385,23 @@ User: "ENTER EXECUTE MODE"
 
 **[EXECUTE]**
 
-Beginning implementation per dark-mode-toggle_01-12-25/dark-mode-toggle_PLAN_01-12-25.md:
+Beginning implementation per activity-status-filters_01-12-25/activity-status-filters_PLAN_01-12-25.md:
 
-✅ 1. Added theme CSS variables to globals.css
-✅ 2. Created theme context in theme-provider.tsx
-✅ 3. Created toggle component
-✅ 4. Added toggle to navigation
-✅ 5. Tested theme persistence - working
+✅ 1. Added filter state and derived list logic
+✅ 2. Created status filter control component
+✅ 3. Added filtered and empty-state rendering
+✅ 4. Added coverage for filter scenarios
+✅ 5. Verified filter interaction manually - working
 
 [Self-review]
 ✅ Implementation matches plan - No deviations
 
-Implementation complete. Dark mode toggle functional.
+Implementation complete. Activity status filters functional.
 ```
 
 **Bad**:
 ```
-User: "ENTER FAST MODE - add dark mode"
+User: "ENTER FAST MODE - add list filters"
 
 [MODE: FAST]
 
@@ -412,7 +412,7 @@ User: "ENTER FAST MODE - add dark mode"
 ...
 
 **[EXECUTE]**
-Implementing dark mode now...
+Implementing filters now...
 ❌ VIOLATION: Skipped mandatory pause, didn't wait for approval
 ```
 

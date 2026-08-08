@@ -251,7 +251,7 @@ Claude Code and Codex share the `process/` directory. Full rules:
 `process/development-protocols/plan-lifecycle.md` (§Task-Folder Framework + §Feature Folder Lifecycle).
 
 - `process/general-plans/` — general plans. New plans use the task-folder convention
-  (`{slug}_{dd-mm-yy}/` holding `{slug}_PLAN_{dd-mm-yy}.md` + colocated reports/refs). Legacy flat
+  (`{slug}_{dd-mm-yy}/` holding `{slug}_PLAN_{dd-mm-yy}.md` + colocated artifacts such as reports and reference notes). Legacy flat
   `*_PLAN_*.md` / `PLAN.md` / `phase-*.md` shapes are READ-ONLY for audits/resume, never new-write targets.
 - `process/context/` — source of truth for durable project knowledge. Read
   `process/context/all-context.md` first, then route to the relevant root file or context group

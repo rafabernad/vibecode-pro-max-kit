@@ -1180,7 +1180,7 @@ flowchart TD
 process/
 ├── general-plans/
 │   ├── active/
-│   │   └── webhooks_28-05-26/          # 📋 Task folder: plan + colocated reports/refs
+│   │   └── webhooks_28-05-26/          # 📋 Task folder: plan + colocated artifacts
 │   │       └── webhooks_PLAN_28-05-26.md
 │   ├── completed/                       # ✅ Archived (searchable history)
 │   └── backlog/                         # 📌 Deferred work
@@ -1370,7 +1370,7 @@ When a topic builds up 5 or more files, it gets its own **feature folder** — a
 
 ```
 process/features/{feature}/
-├── active/{slug}_{date}/   # 📋 Plans being worked on (reports/refs colocated)
+├── active/{slug}_{date}/   # 📋 Plans being worked on (artifacts colocated in task folder)
 ├── completed/              # ✅ Archived plans (searchable decision history)
 └── backlog/                # 📌 Deferred work (agents check before duplicating)
 ```
