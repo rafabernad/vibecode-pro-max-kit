@@ -387,6 +387,40 @@ _List the files, packages, and runtime surfaces this plan touches. Update before
 - `components/Chat.tsx` — chat tab
 - `components/ui/` — shadcn/ui customized components
 
+## Touchpoints
+
+- `app/` runtime surface for the main page shell, providers, and global styles
+- `components/` UI surface for feed, navigation, drawers, and profile/chat tabs
+- `lib/mockData.ts` data contract used by all view components
+
+## Public Contracts
+
+- Main page tab navigation behavior and drawer open/close interactions
+- Mock-data interfaces consumed across the component tree
+- Provider wiring for React Query in the app shell
+
+## Verification Evidence
+
+| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |
+|---|---|---|---|
+| `pnpm test -- --runInBand` for component and data-shape checks | Fully-Automated | product-behavior | AC-01, AC-03, AC-05 |
+| Manual swipe/feed navigation pass on mobile and desktop | Hybrid | product-behavior | AC-02, AC-04, AC-06 |
+| Browser console and runtime hydration check during tab/drawer interactions | Hybrid | integration-runtime | AC-05, AC-07 |
+| Placeholder visual-regression snapshot harness for future UI drift control | Fully-Automated | harness-process | Helper integrity only — does not by itself prove user behavior; temporary until richer flow coverage exists |
+
+Meta-evidence note: rows labelled `harness-process` or `artifact-certification` are helper/process integrity evidence only. They require stronger product-behavior or integration-runtime proof before the related acceptance criterion can be treated as fully proven.
+
+## Test Infra Improvement Notes
+
+- Replace the placeholder UI snapshot harness with scenario-specific interaction coverage for drawer and tab flows.
+- Add a stable mobile gesture test for swipe-card behavior once the runtime fixture is available.
+
+## Resume and Execution Handoff
+
+- Start by reading `Blast Radius`, `Verification Evidence`, and `Validate Contract` together.
+- If only helper-integrity evidence is green for a behavior, keep that behavior visible as a residual until product/runtime proof is added.
+- Persist any execute report inside the same task folder as the plan rather than a sibling `reports/` directory.
+
 ## Phase Loop Progress
 
 - [ ] 1a. Research updated — context and codebase scan complete
@@ -394,7 +428,7 @@ _List the files, packages, and runtime surfaces this plan touches. Update before
 - [ ] 2. Validate contract written — vc-validate-agent gate verdict is green
 - [ ] 3. Execute complete — all checklist items done, tests pass
 - [ ] 4. Update process — plan archived, context docs updated, memory notes written
-- [ ] 5. Report written — execute report filed to reports/
+- [ ] 5. Report written — execute report filed in the task folder beside the plan
 
 > **IMPORTANT:** Step 2 is never skippable. A placeholder Validate Contract is a blocker — do not proceed to step 3 until a vc-validate-agent gate verdict is present.
 

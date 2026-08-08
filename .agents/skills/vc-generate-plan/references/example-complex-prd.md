@@ -1996,6 +1996,42 @@ _List the files, packages, and runtime surfaces this plan touches. Update before
 - `apps/nextjs/src/app/(new-dashboard)/[orgSlug]/[accountSlug]/_components/achievements/AchievementsSection.tsx` — bento layout (new file)
 - `apps/nextjs/src/app/(new-dashboard)/[orgSlug]/[accountSlug]/_components/achievements/cards/` — card components directory
 
+## Touchpoints
+
+- Prisma schema and database query surfaces for comment-derived analytics
+- API router and dashboard data-loading path for achievements
+- Zustand store and dashboard component tree for rendering card state
+- Responsive browser runtime across mobile/tablet/desktop
+
+## Public Contracts
+
+- Achievements data payload shape returned by the API
+- Dashboard section rendering contract for the achievements module
+- Store selectors/actions exposed to card components
+- Performance and accessibility expectations for the dashboard surface
+
+## Verification Evidence
+
+| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |
+|---|---|---|---|
+| API and component integration test suite for achievements cards and store wiring | Fully-Automated | product-behavior | AC-01, AC-02, AC-04 |
+| Manual end-to-end dashboard walkthrough across representative accounts | Hybrid | product-behavior | AC-03, AC-05, AC-06 |
+| Query/runtime validation of Prisma-backed aggregation paths under seeded data | Hybrid | integration-runtime | AC-02, AC-04, AC-07 |
+| Placeholder report-pack generation for evidence collation during phased rollout | Fully-Automated | artifact-certification | Helper/process integrity only — documents rollout evidence but does not by itself prove shipped behavior; temporary until stronger product/runtime proof is expanded |
+
+Meta-evidence note: rows labelled `harness-process` or `artifact-certification` are supporting evidence only. VALIDATE should carry them as visible residuals unless paired with product-behavior or integration-runtime proof for the same criterion.
+
+## Test Infra Improvement Notes
+
+- Add stable seeded-account fixtures so the manual dashboard walkthrough can be partially promoted into automated scenario coverage.
+- Replace the evidence-pack placeholder row with scenario-specific runtime assertions once phased rollout tooling stabilizes.
+
+## Resume and Execution Handoff
+
+- Resume phase execution from the selected phase plan, but cross-check its gates against this umbrella-level `Verification Evidence`.
+- Treat artifact/certification rows as process support, never as the sole reason to mark a criterion proven.
+- Keep phase reports and validate notes inside the task folder alongside the owning plan artifacts.
+
 ## Phase Loop Progress
 
 For each phase (Phase-01 through Phase-09), the loop runs independently:
