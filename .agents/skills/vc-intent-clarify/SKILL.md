@@ -199,12 +199,12 @@ Use this analysis to GENERATE questions — not to answer them. The goal is to s
 
 CRITICAL dimensions appear first. The user can say "skip useful questions" to answer only CRITICAL ones.
 
-### Step 4 — Format each question using AskUserQuestion tool
+### Step 4 — Format each question using the host agent's interactive question primitive
 
-**REQUIRED: use the `AskUserQuestion` tool to render all Tier 2 questions.** Do NOT render questions as markdown text. The AskUserQuestion tool renders clickable option selections in the Claude Code UI, which is far faster for the user than typing answers.
+**Preferred:** use the best structured question tool available in the current host (`AskUserQuestion`, `request_user_input`, or equivalent). Do NOT hard-require a vendor-specific primitive when the host does not provide it.
 
 **How to call it:**
-- Pass all questions in a single `AskUserQuestion` call (up to 4 per call)
+- Pass all questions in a single structured-question call when the tool supports batching (up to 4 per call)
 - Group CRITICAL questions into the first call(s), USEFUL questions after
 - Use `multiSelect: false` for mutually exclusive choices (default)
 - Use `multiSelect: true` only when the user genuinely needs to pick multiple options (e.g. "which packages are in scope")
@@ -212,13 +212,13 @@ CRITICAL dimensions appear first. The user can say "skip useful questions" to an
 - Set `description` to the 1–2 sentence consequence explanation
 - Each option `label` is the short choice text; `description` is the implication
 
-**Option rules (same as before, now applied to AskUserQuestion fields):**
+**Option rules (same as before, now applied to the host tool fields):**
 - Minimum 3 options per question (the tool supports up to 4; always include an "Other" option as the last one)
 - Mark exactly one option as `(Recommended)` by appending it to the label: `"Sequential — single agent (Recommended)"`
 - Fill option labels with concrete values from the research pass (real file paths, package names, plan IDs) — never generic placeholders
 - The "Other" option label: `"Other"` with description: `"Describe your preference in the next message"`
 
-**If AskUserQuestion is unavailable** (tool not in scope, non-interactive context): fall back to the markdown format below, but always prefer the tool when available.
+**If no structured question tool is available** (tool not in scope, non-interactive context): fall back to the markdown format below, but always prefer a native interactive tool when available.
 
 ```
 **Q[N]: [Question title]**

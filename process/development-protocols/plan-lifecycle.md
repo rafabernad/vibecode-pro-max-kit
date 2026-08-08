@@ -178,7 +178,7 @@ failures. Add frontmatter to legacy plans opportunistically when they are next t
 ## Stronger Direct-Plan Contract
 
 For new or newly touched direct `*_PLAN_*.md` files, required sections are defined in
-`.claude/skills/vc-generate-plan/SKILL.md`. Use Markdown-structured sections, not a second
+`.agents/skills/vc-generate-plan/SKILL.md`. Use Markdown-structured sections, not a second
 machine-only schema.
 
 ## Reports and References
@@ -298,8 +298,8 @@ definitions and skills, which all defer here for the canonical statement.
 ### Rule 2 — No Durable→Movable References (mandatory)
 
 Durable files MUST NOT link to a SPECIFIC movable task artefact. Durable files are:
-`process/context/**`, `process/development-protocols/**`, `.claude/agents/**`,
-`.claude/skills/**`.
+`process/context/**`, `process/development-protocols/**`, `.agents/agents/**`,
+`.agents/skills/**`.
 
 A "specific movable task artefact" is a concrete `*_PLAN_*.md` / `*_SPEC_*.md` /
 `*_REPORT_*.md` / `*_REF_*.md` / `*_NOTE_*.md` / `*_CHECKPOINT_*.md` filename, or a

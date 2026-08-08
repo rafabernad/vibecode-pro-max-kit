@@ -146,7 +146,7 @@ Count how many signals are present. Each signal counts as 1. Use the score to se
 |-------|-------|---------------------|
 | 0–1 | LOW | Sequential — one vc-agent at a time. Do not mention fan-out. |
 | 2–3 | MEDIUM | Parallel subagents — spawn one vc-agent per direction; orchestrator merges outputs. |
-| 4+ | HIGH | Workflow or Agent team — workflow for deterministic step-by-step pipelines (automated, predictable sequence); **agent team** (named teammates + shared task list: TeamCreate + TaskCreate/TaskUpdate + Agent with team_name/name + SendMessage, tracked by TaskList — **NOT** parallel subagents) when specialists must share what they find while still working (real-time coordination). Parallel subagents are fire-and-forget and cannot talk to each other; agent-team members can send messages mid-run. |
+| 4+ | HIGH | Workflow or Agent team — workflow for deterministic step-by-step pipelines (automated, predictable sequence); **agent team** (named teammates + shared task list or registry with mid-run coordination — **NOT** parallel subagents) when specialists must share what they find while still working (real-time coordination). Parallel subagents are fire-and-forget and cannot talk to each other; agent-team members coordinate mid-run through the host's native primitives or orchestrator-managed state. |
 
 **Auto-skip rule**: single-file or trivial changes always use sequential regardless of score. Do not mention other strategies for trivial changes.
 
@@ -163,7 +163,7 @@ ALL 4 strategies must always be evaluated and presented. Never omit one.
 | **Sequential** | One vc-agent at a time in strict RIPER-5 order: orchestrator spawns vc-research-agent → waits → spawns vc-innovate-agent → waits → etc. Each agent gets the previous agent's output. Single context window per phase. | 1 agent per phase (6 total for full RIPER-5) | None | Trivial/single-file changes; iterative `/goal` phase-program execution where steps are known but parallelism adds no benefit |
 | **Parallel subagents** | Orchestrator spawns multiple vc-agents simultaneously via the `Agent` tool, each investigating one independent direction. Each agent loads its own context, invokes its own skills (vc-scout, vc-docs-seeker, vc-sequential-thinking), and returns a result. Orchestrator merges. | 4 (Layer 1 dimensions) + N (one per direction) + 3 (optional validation fan-out) = 7–15 typical | >30: show breakdown before proceeding; >100: ask explicit confirmation | 5+ independent directions (e.g. 5 separate codebase areas, 5 phase plans to validate simultaneously) with no mid-task communication needed between agents |
 | **Workflow** | Full RIPER-5 pipeline as a deterministic `Workflow` script. Each phase is a `phase()` + `agent()` call. Supports `pipeline()` for per-item fan-out, `parallel()` barriers when all-results are needed before proceeding, and loop-until-dry patterns. Can run the full RESEARCH→VALIDATE→EXECUTE→TEST sequence automatically with built-in gates. | P (phase steps) × A (agents per step) × I (iterations) = P × A × I; up to 1000 agents, 16 concurrent | >30: show breakdown; >100: ask confirmation | Full RIPER-5 automation, TDD fan-out loops, metric iteration, large sweeps (lint/test/migrate); unknown item count upfront; quality > cost |
-| **Agent team** | Claude Code's built-in team feature: `TeamCreate` provisions named specialist teammates. Each teammate gets a `TaskCreate` assignment scoped to their specialty (e.g. one runs vc-research-agent, another runs vc-validate-agent, another runs vc-execute-agent). `SendMessage` enables mid-execution coordination. `TaskList` tracks all in-flight work. | M (members) × R (rounds) = M × R; keep M ≤ 6, R ≤ 3 unless scope demands it; typically 6–18 total | >6 members: show each member's role and ask explicit confirmation | 2+ workstreams that must share findings mid-execution (e.g. a security reviewer feeds blockers to the implementer before the implementer finishes); named specialist roles known upfront; adversarial challenge tasks |
+| **Agent team** | Coordinated specialists with a shared state channel. Use native team/task/message primitives when the host provides them; otherwise the orchestrator simulates the team with named subagents plus a shared task list or registry. The key property is mid-execution coordination, not a specific vendor tool. | M (members) × R (rounds) = M × R; keep M ≤ 6, R ≤ 3 unless scope demands it; typically 6–18 total | >6 members: show each member's role and ask explicit confirmation | 2+ workstreams that must share findings mid-execution (e.g. a security reviewer feeds blockers to the implementer before the implementer finishes); named specialist roles known upfront; adversarial challenge tasks |
 
 ### Cost Guard Rules
 
@@ -195,7 +195,7 @@ Use these rules to select and justify the recommendation — not the threshold t
 - **Sequential**: right for trivial or single-file changes; right for `/goal` phase-program execution where each phase clearly depends on the previous. Hard limit: single context window per phase. Each vc-agent (vc-research-agent, vc-plan-agent, etc.) runs one at a time; orchestrator hands off between them.
 - **Parallel subagents**: right when there are 5+ independent items in different file domains with no mid-task communication needed. Each spawned agent uses the same vc-system agents and skills but works on a scoped slice. Orchestrator must stay clean (parent context must not accumulate all output). Time savings: 50–70%. Cost: approximately N× linear token multiplier.
 - **Workflow**: right for deterministic pipelines (full RIPER-5 automation, TDD loop, metric iteration, quality gate sequences), tasks too big for a single context window, or when the item count is unknown upfront. The workflow script calls vc-system agents as `agent()` calls in `pipeline()` or `parallel()` steps. Quality > cost priority. Up to 1000 agents, 16 concurrent. Total tokens roughly the same as sequential — most cost-effective for large volume.
-- **Agent team**: right when 2+ specialist workstreams must share findings mid-execution (not just consume the same input), when named roles are known upfront (e.g. security reviewer + implementer + tester coordinating live), or when an adversarial challenge pattern is required. Uses Claude Code `TeamCreate` + `TaskCreate` + `SendMessage`. Each teammate runs its own vc-agent and skills. NOT for simple fan-out where agents work independently — use parallel subagents for that. **Mechanism:** a team shares a TaskList and uses SendMessage to coordinate mid-run; parallel subagents have NO inter-agent channel and CANNOT coordinate — so any task that needs mid-execution coordination (e.g. blast-radius non-overlap across phase plans) MUST be agent-team, never parallel subagents.
+- **Agent team**: right when 2+ specialist workstreams must share findings mid-execution (not just consume the same input), when named roles are known upfront (e.g. security reviewer + implementer + tester coordinating live), or when an adversarial challenge pattern is required. Use the host's native team/task/message primitives when available; otherwise simulate the team with orchestrator-managed named subagents plus a shared coordination artifact. Each teammate runs its own vc-agent and skills. NOT for simple fan-out where agents work independently — use parallel subagents for that. **Mechanism:** a team shares state and can coordinate mid-run; parallel subagents have NO inter-agent channel and CANNOT coordinate — so any task that needs mid-execution coordination (e.g. blast-radius non-overlap across phase plans) MUST be agent-team in capability terms, not vendor terms.
 
 ---
 
@@ -204,9 +204,9 @@ Use these rules to select and justify the recommendation — not the threshold t
 When a plan describes a program with 3+ phases (phase program classification, signal S4 present):
 
 - **Sequential is NEVER valid** for plan creation fan-out OR validate fan-out across the phases.
-- **3+ phase-plan CREATION default: AGENT TEAM.** Phase plans share files (CLAUDE.md, agent .md files) and MUST coordinate blast-radius non-overlap + dependency declarations — only an agent team can do this (TeamCreate + shared TaskList + SendMessage). Fire-and-forget subagents cannot communicate, so they cannot keep blast radii disjoint and are the WRONG strategy for plan creation. (Outer-PVL VALIDATE fan-out across already-written phase plans, where each validator reads one finished plan with no cross-talk, MAY use independent read-only subagents — see the reconciliation note below.)
+- **3+ phase-plan CREATION default: AGENT TEAM.** Phase plans share files (`AGENTS.md` / `CLAUDE.md`, agent surfaces, protocol docs) and MUST coordinate blast-radius non-overlap + dependency declarations. Fire-and-forget subagents cannot communicate, so they cannot keep blast radii disjoint and are the WRONG strategy for plan creation. Use native team tooling when available; otherwise use orchestrator-managed coordinated subagents with a shared registry. (Outer-PVL VALIDATE fan-out across already-written phase plans, where each validator reads one finished plan with no cross-talk, MAY use independent read-only subagents — see the reconciliation note below.)
 - **Reconciliation (CREATION vs read-only VALIDATE fan-out):** validating N already-written plans needs no inter-agent talk, so bare parallel subagents are valid there; plan CREATION needs cross-talk, so it is agent-team. Note `orchestration.md` even describes Outer PVL as an *agent-team* — prefer agent-team for both and reserve bare parallel subagents only for truly independent read-only fan-out.
-- **If phases have complex interdependencies requiring mid-draft communication** (e.g., phase 2 plan depends on design decisions surfaced during phase 1 planning): use agent team instead. Assign one teammate per phase, use `SendMessage` for cross-phase coordination.
+- **If phases have complex interdependencies requiring mid-draft communication** (e.g., phase 2 plan depends on design decisions surfaced during phase 1 planning): use agent team instead. Assign one teammate per phase and coordinate through native messaging or orchestrator-managed handoff.
 - **If the total phase count is unknown upfront** (e.g., the program scope is discovered incrementally): use workflow so the pipeline can expand without re-spawning the orchestrator. Each `agent()` call in the workflow runs the appropriate vc-agent for that phase.
 
 ---
@@ -261,17 +261,17 @@ workflow script
 
 ### 4 — Agent Team (multiple specialist teammates)
 
-Claude Code's built-in `TeamCreate` feature provisions named teammates. Each teammate is assigned a specialized role via `TaskCreate`. Teammates communicate via `SendMessage`. `TaskList` tracks in-flight work.
+When the host provides native team primitives, use them to provision named teammates and route messages. When it does not, the orchestrator owns the same behavior explicitly: named subagents, a shared task list or registry, and message handoff between rounds.
 
 ```
-TeamCreate("security-review") → teammate A: runs vc-validate-agent (security dimension)
-TeamCreate("implementation")  → teammate B: runs vc-execute-agent (implements)
-TeamCreate("test-coverage")   → teammate C: runs vc-tester (writes/runs tests)
-SendMessage: A → B (security findings mid-implementation, not after)
+teammate A: runs vc-validate-agent (security dimension)
+teammate B: runs vc-execute-agent (implements)
+teammate C: runs vc-tester (writes/runs tests)
+mid-run coordination: A → B (security findings arrive before implementation finalizes)
 ```
 
 - Each teammate runs its own vc-agent (vc-research-agent, vc-plan-agent, vc-execute-agent, vc-tester, vc-debugger, etc.) and invokes the relevant skills for their specialty.
-- Named roles known upfront. Mid-execution coordination via `SendMessage`.
+- Named roles known upfront. Mid-execution coordination via native messaging or orchestrator-managed state.
 - Highest cost — all teammates are active simultaneously.
 - NOT appropriate for simple fan-out where agents work independently — use parallel subagents for that.
 - Best for: security reviewer + implementer + tester coordinating live; adversarial plan challenge (one agent proposes, another attacks); multi-specialist investigation where findings from specialist A must reach specialist B before B finalizes.

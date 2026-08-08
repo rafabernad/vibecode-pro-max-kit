@@ -78,7 +78,7 @@ export function loadRoutingPolicy() {
 }
 
 export function listSkillDirs() {
-  const skillsDir = abs(".claude/skills");
+  const skillsDir = abs(".agents/skills");
   if (!fs.existsSync(skillsDir)) return [];
   return fs.readdirSync(skillsDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -94,7 +94,7 @@ export function loadSkillInventory() {
   }
 
   return listSkillDirs().map((skill) => {
-    const skillPath = `.claude/skills/${skill}/SKILL.md`;
+    const skillPath = `.agents/skills/${skill}/SKILL.md`;
     const text = exists(skillPath) ? read(skillPath) : "";
     const parsed = exists(skillPath) ? parseFrontmatter(skillPath) : null;
     const fields = parsed?.fields || {};

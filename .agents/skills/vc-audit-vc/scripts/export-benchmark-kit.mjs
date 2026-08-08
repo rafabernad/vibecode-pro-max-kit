@@ -204,7 +204,7 @@ You are operating inside an isolated benchmark task repository.
 
 Read AGENTS.md first for tool-specific notes, then read process/context/all-context.md and process/development-protocols/all-development-protocols.md before substantial work.
 
-Use the bundled .claude/agents, .claude/skills, hooks, and process/development-protocols as the harness source of truth. Treat process/context/ as benchmark-local context only. Do not assume any source-project product context exists.
+Use the bundled .agents/agents, .agents/skills, .claude/hooks, and process/development-protocols as the harness source of truth. Treat process/context/ as benchmark-local context only. Do not assume any source-project product context exists.
 
 For benchmark tasks, route adaptively: use lightweight lanes for small fixes and fuller RIPER-5 planning, validation, and verification when the task scope warrants it. Do not pause for normal reversible gates when an autopilot benchmark instruction grants standing consent. Pause only for irreversible or outward-facing actions.
 `;
@@ -214,8 +214,8 @@ const genericAgents = `# AGENTS.md - Benchmark Harness Adapter
 CLAUDE.md is the source of truth for workflow behavior in this benchmark task.
 
 Codex-specific notes:
-- Skills live in .agents/skills, symlinked to .claude/skills.
-- Agent identity lives in .claude/agents/*.md and .codex/agents/*.toml.
+- Skills live in .agents/skills.
+- Agent identity lives in .agents/agents/*.md and .codex/agents/*.toml.
 - Durable task knowledge belongs in process/context/.
 - This snapshot is benchmark-local and intentionally excludes source-project feature plans, product context, and general-plan history.
 `;
@@ -432,7 +432,7 @@ Local no-spend checks:
 python -m py_compile harbor_agents/benchmark_harness_agent.py
 test -f benchmark-profile.md
 test -f benchmark-kit-manifest.json
-test -L .agents/skills
+test -d .agents/skills
 \`\`\`
 `;
 
@@ -479,11 +479,15 @@ if (!dryRun) {
     writeFile(rel, "", generatedFiles);
   }
 
-  const symlinkTarget = "../.claude/skills";
-  const symlinkPath = path.join(outDir, ".agents/skills");
-  ensureDir(path.dirname(symlinkPath));
-  fs.symlinkSync(symlinkTarget, symlinkPath);
-  generatedFiles.push(".agents/skills");
+  const claudeAgentsLinkPath = path.join(outDir, ".claude/agents");
+  ensureDir(path.dirname(claudeAgentsLinkPath));
+  fs.symlinkSync("../.agents/agents", claudeAgentsLinkPath);
+  generatedFiles.push(".claude/agents");
+
+  const claudeSkillsLinkPath = path.join(outDir, ".claude/skills");
+  ensureDir(path.dirname(claudeSkillsLinkPath));
+  fs.symlinkSync("../.agents/skills", claudeSkillsLinkPath);
+  generatedFiles.push(".claude/skills");
 
   const generatedFilesWithManifest = [...generatedFiles, "benchmark-kit-manifest.json"];
   const snapshot = {

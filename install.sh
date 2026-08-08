@@ -4,8 +4,9 @@ set -euo pipefail
 # vibecode-pro-max-kit installer
 # Clean install with backup for both new and existing projects.
 # Replaces .claude/, .codex/, .agents/, CLAUDE.md, AGENTS.md with kit versions.
+# Canonical agent content lives under .agents/{agents,skills}; .claude/ keeps host-specific hooks/settings plus compatibility links.
 # Preserves: process/ (user content). Merges .claude/settings.json (not replaced if present).
-# After this script, run Claude Code and say "Run vc-setup" to
+# After this script, open Codex in the project and run /vc-setup to
 # auto-detect your project, scaffold process/, and populate context.
 
 REPO="https://github.com/withkynam/vibecode-pro-max-kit.git"
@@ -321,7 +322,7 @@ while IFS= read -r line; do
     : # symlink created successfully
   else
     # Fallback: copy the target contents to the link path
-    # LINK_TARGET is relative (e.g. ../.claude/skills); resolve from LINK_PATH's parent dir
+    # LINK_TARGET is relative (e.g. ../.agents/skills); resolve from LINK_PATH's parent dir
     _LINK_PARENT_DIR="$(cd "$(dirname "$LINK_PATH")" && pwd)"
     _LINK_TARGET_ABS="$_LINK_PARENT_DIR/$LINK_TARGET"
     rm -rf "$LINK_PATH" 2>/dev/null || true
@@ -409,7 +410,7 @@ cleanup
 # ══════════════════════════════════════════════════════
 # Post-install self-check: verify discover-skills works
 # ══════════════════════════════════════════════════════
-if node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs >/dev/null 2>&1; then
+if node .agents/skills/vc-context-discovery/scripts/discover-skills.mjs >/dev/null 2>&1; then
   echo "  install.sh: discover-skills OK"
 else
   echo "  Warning: discover-skills.mjs returned non-zero exit. Run manually to diagnose."
@@ -418,8 +419,8 @@ fi
 # ══════════════════════════════════════════════════════
 # Summary
 # ══════════════════════════════════════════════════════
-AGENT_COUNT=$(find .claude/agents -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-SKILL_COUNT=$(find .claude/skills -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+AGENT_COUNT=$(find .agents/agents -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+SKILL_COUNT=$(find .agents/skills -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
 HOOK_COUNT=$(find .claude/hooks -maxdepth 1 \( -name '*.cjs' -o -name '*.mjs' \) 2>/dev/null | wc -l | tr -d ' ')
 
 echo ""
@@ -446,15 +447,16 @@ if [ "$HAS_EXISTING" = true ] && [ -z "$PRIOR_SNAPSHOT" ]; then
   echo ""
   echo -e "  ${YELLOW}Note:${NC} No prior snapshot found. Custom vc-prefixed skills/agents"
   echo "  (if any) may have been treated as kit-owned during legacyDeletions."
-  echo "  Run: ls .claude/skills/ .claude/agents/ to verify your custom files."
+  echo "  Run: ls .agents/skills/ .agents/agents/ to verify your custom files."
 fi
 
 echo ""
 if [ "$HAS_EXISTING" = true ]; then
   # Upgrade path: existing harness detected before install — route to vc-update
   echo "  Next (upgrade detected):"
-  echo "    1. Run: claude"
-  echo '    2. Say: "Run vc-update"'
+  echo "    1. Open Codex in this project"
+  echo '    2. Run: /vc-update'
+  echo '       Claude fallback: say "Run vc-update"'
   echo ""
   echo "  vc-update will sync the new version and, if it finds old-format plans,"
   echo "  context docs, or folders, hand you a ready-to-paste prompt to finish"
@@ -462,8 +464,9 @@ if [ "$HAS_EXISTING" = true ]; then
 else
   # Fresh install path: no prior harness — route to vc-setup
   echo "  Next:"
-  echo "    1. Run: claude"
-  echo '    2. Say: "Run vc-setup"'
+  echo "    1. Open Codex in this project"
+  echo '    2. Run: /vc-setup'
+  echo '       Claude fallback: say "Run vc-setup"'
   echo ""
   echo "  vc-setup will auto-detect your project, scaffold the process/"
   echo "  directory, deep-scan your codebase, and populate context with"

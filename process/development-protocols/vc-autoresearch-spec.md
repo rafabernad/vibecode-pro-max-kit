@@ -16,7 +16,7 @@ metadata:
 > bookkeeper for PVL (plan-validate-fix loop) and EVL (execute-validate-fix loop), and is
 > directly invocable for standalone spec/doc/UX/test hardening.
 >
-> **Authority:** `.claude/skills/vc-autoresearch/SKILL.md` is the operative contract; this
+> **Authority:** `.agents/skills/vc-autoresearch/SKILL.md` is the operative contract; this
 > document is the deeper design reference. Where the two diverge, the SKILL.md wins.
 
 # vc-autoresearch — Specification
@@ -193,7 +193,7 @@ Under `/goal` generally: all termination conditions auto-accepted except regress
 These are reusable starting configurations. All fields can be overridden per invocation.
 
 ### spec
-- **Corpus:** `process/development-protocols/*.md`, `.claude/agents/*.md`
+- **Corpus:** `process/development-protocols/*.md`, `.agents/agents/*.md`
 - **Investigation threads (per agent):** cross-file signal consistency, undefined cycle caps, missing fallback cases, contradictions, PVL/EVL gate omissions, signal vocabulary gaps
 - **Research agents:** 2 (split: behavior-reference + orchestration | agent .md files)
 - **Fix agents:** 3 (one per file group)
@@ -217,7 +217,7 @@ These are reusable starting configurations. All fields can be overridden per inv
 ### docs
 - **Corpus:** `process/context/**/*.md`
 - **Investigation threads:** stale file references, missing routing entries, broken cross-links, outdated procedures, orphaned files
-- **Safety check:** `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs`
+- **Safety check:** `node .agents/skills/vc-audit-context/scripts/validate-context-discovery.mjs`
 - **Max iterations:** 8 | Consecutive ALL_CLEAR needed: 1
 
 ### plan (lightweight pre-PVL pass)
@@ -323,7 +323,7 @@ Useful to port: core loop mechanics, probe (8-persona saturation), reason (adver
 
 ## Implementation backlog
 
-- [ ] Write SKILL.md at `.claude/skills/vc-autoresearch/SKILL.md`
+- [ ] Write SKILL.md at `.agents/skills/vc-autoresearch/SKILL.md`
 - [ ] Remove `vc-autoresearch` from the Removed Skills table in vc-system-behavior-reference.md (prerequisite before any implementation)
 - [ ] Add `ALL_CLEAR` and `REGRESSION_DETECTED` to signal vocabulary in vc-system-behavior-reference.md
 - [ ] Add entry to CLAUDE.md skill registry (under contract skills)

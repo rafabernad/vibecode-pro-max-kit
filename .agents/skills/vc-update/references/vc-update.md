@@ -10,9 +10,9 @@ The manifest uses glob-based patterns resolved by `resolve-manifest.mjs`.
 {
   "version": "3.0.0",
   "include": [
-    ".claude/agents/**",
-    ".claude/skills/**",
-    ".claude/skills/**/.??*",
+    ".agents/agents/**",
+    ".agents/skills/**",
+    ".agents/skills/**/.??*",
     ".claude/hooks/**",
     ".claude/settings.json",
     ".codex/**",
@@ -27,12 +27,15 @@ The manifest uses glob-based patterns resolved by `resolve-manifest.mjs`.
     "**/.git/**",
     "**/.logs/**",
     ".codex/statusline.cjs",
-    ".claude/skills/vc-agent-browser/scripts/node_modules/**"
+    ".agents/skills/vc-agent-browser/scripts/node_modules/**"
   ],
   "strip": [],
   "merge": [".claude/settings.json"],
   "copyIfMissing": [],
-  "symlinks": { ".agents/skills": "../.claude/skills" },
+  "symlinks": {
+    ".claude/skills": "../.agents/skills",
+    ".claude/agents": "../.agents/agents"
+  },
   "kitOnly": [
     "README.md", "README-preview*.html", "CONTRIBUTING.md", "SECURITY.md",
     "TRADEMARK.md", "LICENSE", "docs/**", "assets/**", ".github/**",
@@ -94,7 +97,10 @@ node "$TMPDIR/resolve-manifest.mjs" --root "$TMPDIR" --kit-only
   "merge": [".claude/settings.json"],
   "copyIfMissing": [],
   "strip": [],
-  "symlinks": { ".agents/skills": "../.claude/skills" },
+  "symlinks": {
+    ".claude/skills": "../.agents/skills",
+    ".claude/agents": "../.agents/agents"
+  },
   "legacyDeletions": ["...paths to delete on migration..."],
   "ownedPaths": ["...union of files + legacyDeletions, sorted..."]
 }
@@ -110,8 +116,8 @@ A snapshot file written to the user project root after each install/update. Cont
 
 **Example:**
 ```
-.claude/agents/vc-code-reviewer.md
-.claude/agents/vc-debugger.md
+.agents/agents/vc-code-reviewer.md
+.agents/agents/vc-debugger.md
 .claude/hooks/descriptive-name.cjs
 .claude/settings.json
 ...
@@ -210,7 +216,7 @@ If `.vc-version` matches the remote manifest version, the deterministic file-syn
 
 ### Adding a new skill to the kit
 
-With the glob-based manifest, adding a new skill directory to `.claude/skills/` in the kit requires **zero manifest changes**. The `include` pattern `.claude/skills/**` automatically picks it up.
+With the glob-based manifest, adding a new skill directory to `.agents/skills/` in the kit requires **zero manifest changes**. The `include` pattern `.agents/skills/**` automatically picks it up.
 
 ## Dry-Run Output Format
 
@@ -219,9 +225,9 @@ vc-update dry run: v2.0.4 -> v2.1.0
 
 FILES:
   [modified]  CLAUDE.md  (+15 -8)
-  [modified]  .claude/agents/vc-execute-agent.md  (+3 -1)
+  [modified]  .agents/agents/vc-execute-agent.md  (+3 -1)
   [new]       .claude/hooks/lib/new-util.cjs
-  [removed]   .claude/skills/deprecated-skill/SKILL.md
+  [removed]   .agents/skills/deprecated-skill/SKILL.md
   [unchanged] AGENTS.md
   ... (42 more unchanged)
 
@@ -232,7 +238,7 @@ COPY-IF-MISSING (skipped, already present):
   (none)
 
 SYMLINKS:
-  [ok]  .agents/skills -> ../.claude/skills
+  [ok]  .claude/skills -> ../.agents/skills
 
 Summary: 5 modified, 2 new, 1 removal, 1 merge skipped, 85 unchanged
 ```

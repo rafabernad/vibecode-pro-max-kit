@@ -22,16 +22,16 @@ Full change list: [CHANGELOG.md](CHANGELOG.md)
 
 ### Step 1 — Run vc-update
 
-In your project root, open Claude Code and say:
-
-```
-Run vc-update
-```
-
-Or invoke the skill directly in any Claude Code session that has access to the kit:
+In your project root, open Codex and run:
 
 ```
 /vc-update
+```
+
+Claude Code fallback:
+
+```
+Run vc-update
 ```
 
 `vc-update` will:
@@ -47,10 +47,10 @@ After `vc-update` completes, run the core validators to confirm green:
 
 ```bash
 # Run these from your project root (not a subdirectory or parent monorepo).
-node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
-node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-skills.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
+node .agents/skills/vc-audit-context/scripts/validate-context-discovery.mjs
 ```
 
 Expected: all 4 exit 0 (these are structural validators — non-zero = failure).
@@ -58,7 +58,7 @@ Expected: all 4 exit 0 (these are structural validators — non-zero = failure).
 To inspect the skill catalog (informational, not a pass/fail validator):
 
 ```bash
-node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs
+node .agents/skills/vc-context-discovery/scripts/discover-skills.mjs
 ```
 
 Expected output: lists 33 skills grouped by layer.
@@ -72,6 +72,12 @@ task folder). `vc-update` does **not** migrate your existing plan folders — it
 only updates harness files under `.claude/`, `.codex/`, and `.agents/`.
 
 **To migrate your existing `process/` layout**, run vc-setup in your project:
+
+```
+/vc-setup
+```
+
+Claude Code fallback:
 
 ```
 Run vc-setup
@@ -99,10 +105,10 @@ Run the four core structural validators after the upgrade and after any layout m
 
 ```bash
 # Run these from your project root (not a subdirectory or parent monorepo).
-node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
-node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-skills.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
+node .agents/skills/vc-audit-context/scripts/validate-context-discovery.mjs
 ```
 
 All four must exit 0 before you start using the upgraded harness.
@@ -110,7 +116,7 @@ All four must exit 0 before you start using the upgraded harness.
 To inspect the skill catalog (informational — prints a grouped list, not a structural pass/fail check):
 
 ```bash
-node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs
+node .agents/skills/vc-context-discovery/scripts/discover-skills.mjs
 ```
 
 Expected output: lists 33 skills grouped by layer. This script exits non-zero when the catalog is missing or the count is too low — treat that as a signal to re-run `vc-update`, not as a structural validator failure on its own.
@@ -146,22 +152,22 @@ process/development-protocols/archive/vc-system-behavior-reference_ARCHIVED_09-0
 ```
 
 Disposition per file:
-- `references/example-complex-prd.md` — **moved** to `.claude/skills/vc-generate-plan/references/example-complex-prd.md` (canonical v3 location)
-- `references/example-simple-prd.md` — **moved** to `.claude/skills/vc-generate-plan/references/example-simple-prd.md` (canonical v3 location)
+- `references/example-complex-prd.md` — **moved** to `.agents/skills/vc-generate-plan/references/example-complex-prd.md` (canonical v3 location)
+- `references/example-simple-prd.md` — **moved** to `.agents/skills/vc-generate-plan/references/example-simple-prd.md` (canonical v3 location)
 - `intent-clarification.md` — **merged** into `orchestration.md` (content folded into §Intent Clarification)
 - `parallel-fan-out.md` — **merged** into `orchestration.md` (content folded into §Parallel Fan-Out Checkpoints)
 - `archive/vc-system-behavior-reference_ARCHIVED_09-06-26.md` — **deleted** (superseded by the 12-file `vc-system-behavior/` split; kept only as git history)
 
-**If you had custom code inside any of the removed skills:** recover it from git history with `git show HEAD:.claude/skills/<skill-name>/SKILL.md` before running the upgrade.
+**If you had custom code inside any of the removed skills:** recover it from git history with `git show HEAD:.agents/skills/<skill-name>/SKILL.md` before running the upgrade.
 
 ---
 
 ## What vc-update Adds
 
 **3 new agents:**
-- `.claude/agents/vc-spec-agent.md`
-- `.claude/agents/vc-validate-agent.md`
-- `.claude/agents/vc-quick-fix-agent.md`
+- `.agents/agents/vc-spec-agent.md`
+- `.agents/agents/vc-validate-agent.md`
+- `.agents/agents/vc-quick-fix-agent.md`
 - (+ matching `.codex/agents/*.toml` for each)
 
 **13 new skills:**
@@ -319,7 +325,7 @@ Hook summary:
 
 ### Custom RIPER-5 workflow references
 
-If your `process/context/` files or plans reference `parallel-fan-out.md` or `intent-clarification.md`, update those references to `orchestration.md` (these files were merged in). PRD example references should point to `.claude/skills/vc-generate-plan/references/` instead of `process/development-protocols/references/`.
+If your `process/context/` files or plans reference `parallel-fan-out.md` or `intent-clarification.md`, update those references to `orchestration.md` (these files were merged in). PRD example references should point to `.agents/skills/vc-generate-plan/references/` instead of `process/development-protocols/references/`.
 
 ---
 
@@ -342,7 +348,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/withkynam/vibecode-pro-max-k
 The `generated-skills-catalog.json` may be absent or stale. Regenerate it:
 
 ```bash
-node .claude/skills/vc-audit-context/scripts/generate-skills-catalog.mjs --write
+node .agents/skills/vc-audit-context/scripts/generate-skills-catalog.mjs --write
 ```
 
 **Validators fail with "agent count mismatch"**
@@ -350,7 +356,7 @@ node .claude/skills/vc-audit-context/scripts/generate-skills-catalog.mjs --write
 Confirm 15 agents are present:
 
 ```bash
-ls .claude/agents/*.md | wc -l
+ls .agents/agents/*.md | wc -l
 ```
 
 Expected: 15. If not, re-run `vc-update` or copy the missing agents from the kit.

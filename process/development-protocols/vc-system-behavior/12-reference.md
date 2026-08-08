@@ -73,7 +73,7 @@ These skills were removed from the system. Do not reference them in agent prompt
 | vc-mcp-management | Generic utility, not wired into any phase |
 | vc-repomix | Generic repo packing, not wired into any phase |
 
-Note: `vc-autoresearch` is **ACTIVE** — it is the loop primitive underlying PVL (`domain: plan`) and EVL (`domain: tests`). See `.claude/skills/vc-autoresearch/SKILL.md` (operative contract) and `process/development-protocols/vc-autoresearch-spec.md` (design reference). It is no longer a removed skill.
+Note: `vc-autoresearch` is **ACTIVE** — it is the loop primitive underlying PVL (`domain: plan`) and EVL (`domain: tests`). See `.agents/skills/vc-autoresearch/SKILL.md` (operative contract) and `process/development-protocols/vc-autoresearch-spec.md` (design reference). It is no longer a removed skill.
 
 ### Skills Merged Into Other Skills
 

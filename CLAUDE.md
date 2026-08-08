@@ -39,9 +39,9 @@ and §Intent Clarification (`vc-intent-clarify`).
 
 Reference docs (harness methodology, not project-specific):
 
-- `.claude/skills/vc-generate-plan/references/example-simple-prd.md` - Reference for simple plan structure
-- `.claude/skills/vc-generate-plan/references/example-complex-prd.md` - Reference for complex plan depth
-- `.claude/skills/vc-generate-phase-program/references/program-goal-charter-template.md` - Program Goal Charter template for phase programs
+- `.agents/skills/vc-generate-plan/references/example-simple-prd.md` - Reference for simple plan structure
+- `.agents/skills/vc-generate-plan/references/example-complex-prd.md` - Reference for complex plan depth
+- `.agents/skills/vc-generate-phase-program/references/program-goal-charter-template.md` - Program Goal Charter template for phase programs
 
 ### Orchestrator Role (Main Claude Code Session)
 
@@ -138,7 +138,7 @@ validate, review, and update-process all run on sonnet.
   frontmatter (`vc-execute-agent`, `vc-fast-mode-agent`, and `vc-quick-fix-agent` are opus; all other vc-agents sonnet).
 - In a fan-out, only the implementing subagent/teammate/workflow-stage is opus; all reviewers,
   researchers, validators, and planners are sonnet.
-- Full rules: `.claude/skills/vc-agent-strategy-compare/SKILL.md` §Model Selection Policy.
+- Full rules: `.agents/skills/vc-agent-strategy-compare/SKILL.md` §Model Selection Policy.
 
 ### Communication Principles (All Human-Facing Output)
 
@@ -168,7 +168,7 @@ plus `process/development-protocols/all-development-protocols.md`.
 
 ### Core Protocol
 
-The complete RIPER-5 protocol is defined in the agent files at `.claude/agents/`.
+The complete RIPER-5 protocol is defined in the canonical markdown agent files at `.agents/agents/`.
 
 > **[MODE: ORCHESTRATOR]** — The orchestrator operates outside the 5 RIPER-5 phase modes. It routes, delegates, and monitors. It does not itself perform research, planning, or implementation. Mode prefix is informational only.
 
@@ -280,13 +280,13 @@ Full specification: `process/development-protocols/autopilot.md §[AUTOPILOT CON
 
 ## Available Workflow Skills
 
-Canonical workflow logic lives in `.agents/skills/` / `.claude/skills/`. The system is split into
-three layers — **actor agents** (own a phase/role, in `.claude/agents/`, NOT skills), **contract
+Canonical workflow logic lives in `.agents/skills/` with `.claude/skills/` as a compatibility link. The system is split into
+three layers — **actor agents** (own a phase/role, in `.agents/agents/`, NOT skills), **contract
 skills** (own a workflow artifact/contract), and **helper skills** (improve how agents work, own no
 artifact). Each `SKILL.md` carries its `layer` + `trigger_keywords` in frontmatter; the full
 per-skill inventory grouped by layer is emitted on demand by
-`node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs` (reads the
-generated skills catalog inventory). Per-skill detail lives in each `.claude/skills/*/SKILL.md`.
+`node .agents/skills/vc-context-discovery/scripts/discover-skills.mjs` (reads the
+generated skills catalog inventory). Per-skill detail lives in each `.agents/skills/*/SKILL.md`.
 
 ### Core Skills
 
@@ -303,7 +303,7 @@ unchanged and are not part of the Codex skill compatibility surface.
 ## Mode Agents (Claude Code Subagents)
 
 Each subagent has a separate context window, tool restrictions, and phase-locked responsibilities.
-Full prompts, invoked-skill lists, and tool grants live in each agent's `.claude/agents/{agent}.md`.
+Full prompts, invoked-skill lists, and tool grants live in each agent's `.agents/agents/{agent}.md`.
 
 | Agent | Trigger | Role |
 |---|---|---|
@@ -335,7 +335,7 @@ Full prompts, invoked-skill lists, and tool grants live in each agent's `.claude
 
 When a user makes a request:
 
-- **Step 0 — Skill discovery:** run `node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs`
+- **Step 0 — Skill discovery:** run `node .agents/skills/vc-context-discovery/scripts/discover-skills.mjs`
   (reads the generated skills catalog inventory) to list every skill grouped by layer with
   its trigger keywords. Match keywords to the request and attach candidate skill names to the
   subagent prompt. Never silently skip a relevant matched skill.
@@ -411,7 +411,7 @@ Two advisory PostToolUse hooks run automatically (both fail-open — they never 
 
 - `node .claude/hooks/post-write-plan-check.mjs` (PostToolUse `Write`) — when a Write targets a
   `process/**/*_PLAN_*.md` file, it runs the plan-artifact structure validator
-  (`.claude/skills/vc-generate-plan/scripts/validate-plan-artifact.mjs`) on the written path and
+  (`.agents/skills/vc-generate-plan/scripts/validate-plan-artifact.mjs`) on the written path and
   surfaces the result. Non-plan writes are a clean no-op.
 - `node .claude/hooks/post-commit-lint.mjs` (PostToolUse `Bash`) — when a Bash invocation is a
   `git commit`, it lints the message for a conventional-commits prefix
@@ -419,7 +419,7 @@ Two advisory PostToolUse hooks run automatically (both fail-open — they never 
 
 **Context Envelope:** every inner-loop agent (research / plan / execute / update-process) emits a
 10-field Context Envelope at session start, in the canonical C-2 order documented in
-`.claude/skills/vc-context-discovery/SKILL.md` §Context Envelope:
+`.agents/skills/vc-context-discovery/SKILL.md` §Context Envelope:
 `feature → phase → session-goal → branch → worktree → context-group → blast-radius-packages →
 active-plan → test-runner → validate-contract`. The `test-runner` multi-runner value uses a
 pipe-delimited DISPLAY format (`bun test | vitest`) that the phase-loop workflow template expands into
@@ -429,8 +429,8 @@ SEQUENTIAL test steps — never a literal shell pipe.
 
 ## Resources
 
-- Agent Definitions: `.claude/agents/*.md`
-- Workflow Skills: `.claude/skills/*/SKILL.md`
+- Agent Definitions: `.agents/agents/*.md`
+- Workflow Skills: `.agents/skills/*/SKILL.md`
 - Plans: `process/general-plans/active/{slug}_{date}/` (active general — task folders), `process/general-plans/{completed,backlog}/` (general archives), `process/features/*/active/{slug}_{date}/` (feature-scoped — task folders), legacy `process/general-plans/{reports,references}/` (deprecated sibling dirs, read-only)
 - Features: `process/features/`
 - Context: `process/context/all-context.md` router plus relevant `process/context/` files/groups

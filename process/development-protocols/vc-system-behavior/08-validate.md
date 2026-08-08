@@ -22,7 +22,7 @@ The VALIDATE phase turns a written plan into an executable contract. It runs a l
 
 **Agent:** `vc-validate-agent` (sonnet)
 
-VALIDATE is planning/analysis work, not source-code execution, so it runs on sonnet. Only phases that carry out real code or build execution (EXECUTE) run on opus. See the model-selection policy in `.claude/skills/vc-agent-strategy-compare/SKILL.md` §Model Selection Policy.
+VALIDATE is planning/analysis work, not source-code execution, so it runs on sonnet. Only phases that carry out real code or build execution (EXECUTE) run on opus. See the model-selection policy in `.agents/skills/vc-agent-strategy-compare/SKILL.md` §Model Selection Policy.
 
 **Tools:** Read, Grep, Glob, Bash, Write (only inside `process/`) — no source code modifications
 

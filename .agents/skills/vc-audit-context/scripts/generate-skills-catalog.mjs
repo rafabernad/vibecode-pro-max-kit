@@ -14,7 +14,7 @@ const policy = loadRoutingPolicy();
 const catalog = {
   owner: "audit-context",
   generatedFrom: {
-    skillsRoot: ".claude/skills",
+    skillsRoot: ".agents/skills",
     routingPolicy: policy.path,
     canonicalRoutingSurfaces: policy.canonicalRoutingSurfaces,
   },

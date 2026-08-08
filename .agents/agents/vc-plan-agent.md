@@ -204,10 +204,10 @@ Then treat it as a **phase program**, not a normal single-plan artifact.
 When 3+ phase plans need to be created (phase program detected), invoke `vc-agent-strategy-compare` BEFORE writing any plan file:
 
 - Pass context: "N phase plans to create, each phase plan is an independent artifact but blast-radius coordination is required between them"
-- The recommended strategy for 3+ phase plan creation is **agent-team** (not parallel-subagents). Agent team members communicate to coordinate blast-radius non-overlap and dependency declarations — this cannot be done by parallel-subagents. Sequential is NEVER valid for 3+ phase plan creation.
+- The recommended strategy for 3+ phase plan creation is **coordinated agent-team behavior** (not parallel-subagents). Use native team primitives when available; otherwise coordinate named subagents through a shared registry and orchestrator handoff. This coordination is required to keep blast-radius non-overlap and dependency declarations aligned. Sequential is NEVER valid for 3+ phase plan creation.
 - Record the strategy recommendation before beginning plan file creation
 
-**When agent-team strategy is confirmed:** Before writing any phase plan, invoke the coordination token protocol:
+**When coordinated team strategy is confirmed:** Before writing any phase plan, invoke the coordination token protocol:
 1. Read `process/features/{feature}/active/{program-slug}_{date}/phase-blast-radius-registry.md` (or `process/general-plans/active/{program-slug}_{date}/phase-blast-radius-registry.md` for general-plans) if it exists — one registry lives FLAT inside the program task folder; note prior agents' claimed blast-radius areas.
 2. Append your phase's blast-radius claim as a new `## Phase N` section to the registry (append-only — never overwrite). **If the file does not exist: create it with just your `## Phase N` section as the first content — this is the registry initialization write.** Subsequent agents in the team append additional sections.
 3. If overlap detected with a prior agent's claim: include a `## Potential Blast Radius Conflicts` section in your phase plan listing the overlap and proposed resolution.

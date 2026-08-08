@@ -110,14 +110,14 @@ if (!fs.existsSync(agentsSkills)) {
 } else {
   const real = fs.realpathSync(agentsSkills);
   const expected = fs.realpathSync(path.join(root, ".claude/skills"));
-  if (real !== expected) fail(".agents/skills does not resolve to .claude/skills");
+  if (real !== expected) fail(".claude/skills does not resolve to .agents/skills");
 }
 
 for (const skill of ["vc-audit-context", "vc-audit-plans", "vc-generate-context", "vc-generate-plan"]) {
-  const file = `.claude/skills/${skill}/SKILL.md`;
-  const codexPath = `.agents/skills/${skill}/SKILL.md`;
+  const file = `.agents/skills/${skill}/SKILL.md`;
+  const compatPath = `.claude/skills/${skill}/SKILL.md`;
   if (!exists(file)) fail(`${file} missing`);
-  if (!exists(codexPath)) fail(`${codexPath} missing`);
+  if (!exists(compatPath)) fail(`${compatPath} missing`);
   if (exists(file)) {
     const fm = parseFrontmatter(file);
     // YAML name uses vc- prefix matching folder name convention
@@ -126,16 +126,16 @@ for (const skill of ["vc-audit-context", "vc-audit-plans", "vc-generate-context"
   }
 }
 
-const skillDirs = listDirs(".claude/skills");
+const skillDirs = listDirs(".agents/skills");
 let checkedSkills = 0;
 for (const skill of skillDirs) {
-  const file = `.claude/skills/${skill}/SKILL.md`;
-  const codexPath = `.agents/skills/${skill}/SKILL.md`;
+  const file = `.agents/skills/${skill}/SKILL.md`;
+  const compatPath = `.claude/skills/${skill}/SKILL.md`;
   if (!exists(file)) {
     fail(`${file} missing`);
     continue;
   }
-  if (!exists(codexPath)) fail(`${codexPath} missing`);
+  if (!exists(compatPath)) fail(`${compatPath} missing`);
   checkedSkills += 1;
 
   const fm = parseFrontmatter(file);
@@ -147,13 +147,13 @@ for (const skill of skillDirs) {
   }
 }
 
-const claudeAgents = listFiles(".claude/agents", ".md");
+const claudeAgents = listFiles(".agents/agents", ".md");
 const codexAgents = listFiles(".codex/agents", ".toml");
 for (const agent of claudeAgents) {
   if (!codexAgents.includes(agent)) fail(`.codex/agents/${agent}.toml missing`);
 }
 for (const agent of codexAgents) {
-  if (!claudeAgents.includes(agent)) fail(`.claude/agents/${agent}.md missing`);
+  if (!claudeAgents.includes(agent)) fail(`.agents/agents/${agent}.md missing`);
 }
 
 // Bare-kit mode: process/context/all-context.md is intentionally absent in a freshly

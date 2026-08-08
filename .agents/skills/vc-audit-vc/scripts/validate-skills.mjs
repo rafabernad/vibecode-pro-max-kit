@@ -41,19 +41,19 @@ function read(relPath) {
   return fs.readFileSync(path.join(root, relPath), "utf8");
 }
 
-const skillsDir = path.join(root, ".claude/skills");
+const skillsDir = path.join(root, ".agents/skills");
 if (!fs.existsSync(skillsDir)) {
-  fail(".claude/skills missing");
+  fail(".agents/skills missing");
 }
 
-const agentsSkills = path.join(root, ".agents/skills");
-if (!fs.existsSync(agentsSkills)) {
-  fail(".agents/skills missing");
+const claudeSkills = path.join(root, ".claude/skills");
+if (!fs.existsSync(claudeSkills)) {
+  fail(".claude/skills missing");
 } else if (fs.existsSync(skillsDir)) {
   const source = fs.realpathSync(skillsDir);
-  const discovered = fs.realpathSync(agentsSkills);
+  const discovered = fs.realpathSync(claudeSkills);
   if (source !== discovered) {
-    fail(".agents/skills does not resolve to .claude/skills");
+    fail(".claude/skills does not resolve to .agents/skills");
   }
 }
 
@@ -61,14 +61,14 @@ const skillNames = listSkillDirs();
 
 let checkedSkills = 0;
 for (const skill of skillNames) {
-  const file = `.claude/skills/${skill}/SKILL.md`;
-  const codexPath = `.agents/skills/${skill}/SKILL.md`;
+  const file = `.agents/skills/${skill}/SKILL.md`;
+  const compatPath = `.claude/skills/${skill}/SKILL.md`;
   if (!exists(file)) {
     fail(`${file} missing`);
     continue;
   }
-  if (!exists(codexPath)) {
-    fail(`${codexPath} missing`);
+  if (!exists(compatPath)) {
+    fail(`${compatPath} missing`);
   }
 
   checkedSkills += 1;

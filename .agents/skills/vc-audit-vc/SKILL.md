@@ -57,9 +57,9 @@ For context routing, grouping, and discoverability audits, use the `audit-contex
 
 ## Rules
 
-- Treat `.claude/agents/` as canonical for agent definitions; `.codex/agents/` mirrors them.
-- Treat `.claude/skills/` as canonical for skills; `.agents/skills/` is the Codex discovery symlink.
-- When updating agents, mirror Claude markdown and Codex TOML surfaces together.
+- Treat `.agents/agents/` as canonical for markdown agent definitions; `.claude/agents/` is the compatibility link and `.codex/agents/` mirrors them.
+- Treat `.agents/skills/` as canonical for skills; `.claude/skills/` is the compatibility link.
+- When updating agents, mirror canonical markdown and Codex TOML surfaces together.
 - Treat `process/_seeds/` as an optional legacy scaffold surface in the live repo. Its absence is a warning-only audit result unless the user is explicitly auditing export-kit scaffolding.
 - Treat validator warnings as audit findings unless the user asks for a strict cleanup.
 - For context routing and discoverability audits, delegate to `audit-context`.

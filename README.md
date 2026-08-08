@@ -156,9 +156,9 @@ When it finishes, it prints one of two messages — **read the bottom of the out
 <h3>🆕 Fresh project</h3>
 Installer detects no harness and prints:
 <br><br>
-<code>Next: Run: claude → Say: "Run vc-setup"</code>
+<code>Next: Open Codex → Run: /vc-setup</code>
 <br><br>
-<strong>→ Open your agent and say <code>Run vc-setup</code></strong>
+<strong>→ Open Codex in the project and run <code>/vc-setup</code></strong>
 <br><br>
 <sub>vc-setup detects your tech stack, creates the <code>process/</code> folder, scans your codebase, and fills in your <em>real</em> architecture, conventions, and test commands — a conversation, not a checklist.</sub>
 </td>
@@ -166,16 +166,16 @@ Installer detects no harness and prints:
 <h3>🔄 Existing harness (upgrade)</h3>
 Installer detects a prior install and prints:
 <br><br>
-<code>Next (upgrade detected): Run: claude → Say: "Run vc-update"</code>
+<code>Next (upgrade detected): Open Codex → Run: /vc-update</code>
 <br><br>
-<strong>→ Open your agent and say <code>Run vc-update</code></strong>
+<strong>→ Open Codex in the project and run <code>/vc-update</code></strong>
 <br><br>
 <sub>vc-update pulls the latest version and, if it finds old-format plans or folders, gives you a ready-to-paste prompt to finish the move with <strong>zero data loss</strong>. Your <code>process/</code> is never touched.</sub>
 </td>
 </tr>
 </table>
 
-> 💡 **You never have to guess the command.** `install.sh` routes you: fresh → `vc-setup`, upgrade → `vc-update`. Re-running install is always safe — it never breaks things. **Codex users:** run `/vc-setup` (or `/vc-update`) instead of saying it in chat.
+> 💡 **You never have to guess the command.** `install.sh` routes you: fresh → `vc-setup`, upgrade → `vc-update`. Re-running install is always safe — it never breaks things. In Codex, run `/vc-setup` or `/vc-update`. In Claude Code, say `Run vc-setup` or `Run vc-update`.
 
 <br>
 
@@ -186,12 +186,14 @@ Installer detects a prior install and prints:
 
 ```
 your-project/
+├── .agents/
+│   ├── agents/              # 🤖 Canonical markdown agent definitions
+│   └── skills/              # ⚡ Canonical shared skills
 ├── .claude/
-│   ├── agents/              # 🤖 15 agent definitions (.md)
-│   ├── skills/              # ⚡ 33 skills (each a dir with SKILL.md)
+│   ├── agents/              # 🔗 Compatibility link to .agents/agents
+│   ├── skills/              # 🔗 Compatibility link to .agents/skills
 │   └── hooks/               # 🪝 10 lifecycle hooks (.cjs / .mjs)
 ├── .codex/agents/           # 🔄 Mirrored agents for Codex
-├── .agents/skills →         # 🔗 Symlink to .claude/skills (Codex discovery)
 ├── CLAUDE.md                # 📋 Orchestrator + routing rules
 ├── AGENTS.md                # 📖 Agent + skill registry (cross-tool)
 └── process/
@@ -199,12 +201,12 @@ your-project/
                                 #    context/, plans, features → built by vc-setup
 ```
 
-- **Non-destructive.** Your existing `.claude/skills/`, `.claude/agents/`, `process/`, and `settings.json` are never wiped. Only kit-owned files are written or updated.
+- **Non-destructive.** Your existing `.agents/skills/`, `.agents/agents/`, `.claude/`, `process/`, and `settings.json` are never wiped. Only kit-owned files are written or updated.
 - **Existing config?** Backed up to `.vibecode-backup/`; your `settings.json` is restored afterward.
 - **Existing `CLAUDE.md`?** Backed up as `CLAUDE.md.pre-vibecode`.
 - **Existing `process/`?** Never touched by install — `vc-setup` / `vc-update` migrate it interactively, showing you the diff first.
 
-> **One-time first-install caveat:** if you have custom skills/agents whose names start with `vc-` (the reserved kit namespace) and have *never* run install before, the stale-removal step may flag them. After install, run `ls .claude/skills/ .claude/agents/` to confirm. Use a non-`vc-` prefix (`my-`, `team-`, `proj-`) for your own additions to avoid this entirely.
+> **One-time first-install caveat:** if you have custom skills/agents whose names start with `vc-` (the reserved kit namespace) and have *never* run install before, the stale-removal step may flag them. After install, run `ls .agents/skills/ .agents/agents/` to confirm. Use a non-`vc-` prefix (`my-`, `team-`, `proj-`) for your own additions to avoid this entirely.
 
 </details>
 
@@ -213,7 +215,7 @@ your-project/
 
 <br>
 
-> Open Claude Code or Codex **with your project folder as the working directory**, then paste:
+> Open Codex or Claude Code **with your project folder as the working directory**, then paste:
 
 ```
 First, install the vibecode-pro-max-kit agent harness by running this command:
@@ -239,6 +241,8 @@ After install completes, run vc-setup and follow the full interactive flow:
 Rules: read and preserve good existing context; show me a summary before each major change
 and wait for my OK; never create empty placeholder files; ask before reorganizing.
 ```
+
+In Codex, replace the plain-text command with `/vc-setup`. In Claude Code, you can say `Run vc-setup`.
 
 </details>
 
@@ -1389,7 +1393,7 @@ The 33 skills fall into three layers. Every `SKILL.md` declares its `layer` + `t
 <td width="33%" valign="top">
 <h1>🎭</h1>
 <strong>Actor agents</strong><br><br>
-Own a phase or role. Live in <code>.claude/agents/</code> — these are the 15 agents, not skills.
+Own a phase or role. Live in <code>.agents/agents/</code> — these are the 15 canonical agents, not skills.
 </td>
 <td width="33%" valign="top">
 <h1>📜</h1>
@@ -1440,7 +1444,7 @@ flowchart TD
 
 - **travels into every worker agent** — `vc-context-discovery` routes each spawned agent to the right `all-{group}.md` router for its task, then to the smallest relevant deep file. A research agent, a plan agent, and a coding agent all start with the same shared understanding
 - **survives a memory reset** — it is on disk, not in a context window; a squeezed session loses none of it
-- **is readable by both Claude and Codex** — `.agents/skills` is a shortcut link to `.claude/skills/`, so the same context system serves both agents without duplication
+- **is readable by both Claude and Codex** — `.agents/skills` is the canonical skill tree, and `.claude/skills/` points at it as a compatibility link
 
 The root router (`all-context.md`) points to group routers (`all-{group}.md`), which route to the smallest relevant deep file. Agents follow the router — they never hard-code file paths. This means renames and group splits require only router edits, not a codebase-wide search.
 
@@ -1561,7 +1565,7 @@ Groups are created automatically when a topic reaches 3+ docs or a single file g
 
 </details>
 
-> **⚠️ Naming rule:** Do NOT use the `vc-` prefix for your own skills or agents — that namespace is reserved for kit-shipped files, and the stale-removal guard treats any `vc-*` path under `.claude/skills/` and `.claude/agents/` as kit-owned. Use `my-`, `team-`, or `proj-` instead.
+> **⚠️ Naming rule:** Do NOT use the vc- prefix for your own skills or agents — that namespace is reserved for kit-shipped files, and the stale-removal guard treats any vc-* path under `.agents/skills/` and `.agents/agents/` as kit-owned. Use prefixes like my-, team-, or proj- instead.
 
 <br>
 
@@ -1586,9 +1590,9 @@ Groups are created automatically when a topic reaches 3+ docs or a single file g
 
 ```text
 your-project/
-├── .claude/{agents,skills,hooks}/   # 🤖 15 agents · ⚡ 33 skills · 🪝 10 hooks
+├── .agents/{agents,skills}/         # 🤖 canonical agents · ⚡ canonical skills
+├── .claude/{agents,skills,hooks}/   # 🔗 compatibility links + Claude hooks
 ├── .codex/agents/                   # 🔄 Mirrored for Codex
-├── .agents/skills -> .claude/skills # 🔗 Symlink for Codex discovery
 ├── CLAUDE.md · AGENTS.md            # 📋 Orchestrator config + cross-tool registry
 └── process/
     ├── context/                     # 🧠 Auto-routed knowledge domains

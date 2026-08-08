@@ -2,22 +2,19 @@
 
 **Bootstrap guard:** If `process/context/all-context.md` does not exist, the harness has not been set up yet (a bare `process/context/` holding only `generated-skills-catalog.json` from install does NOT count). Run `vc-setup` before any task — the context router and protocol docs are absent and agents will not route correctly.
 
-This file is the Codex compatibility layer for the existing `.claude/` system.
+This file is the top-level agent-facing contract for the repository.
 
-Keep this file aligned with [CLAUDE.md](CLAUDE.md)
-as much as possible while adapting Claude-native concepts to Codex-native constructs.
+Keep this file aligned with [CLAUDE.md](CLAUDE.md), but prefer agent-neutral wording and layout rules.
 
-Codex discovers project-local skills from `.agents/skills/`. In this repo, `.agents/skills/`
-is a symlink to `.claude/skills/` so Codex and Claude share the same underlying skill tree:
+The repository now uses an agent-neutral source layout:
 
-- `.claude/skills/` is the canonical source for shared skills and command-style workflows
-- `.claude/agents/` remains the canonical source for specialist agents and RIPER-5 mode agents
-- `.codex/agents/` mirrors `.claude/agents/` for Codex subagent roles
-- shared reusable skills that Codex should discover must live under `.claude/skills/` as real `SKILL.md` files with YAML frontmatter; agent wrappers should not exist
+- `.agents/skills/` is the canonical source for shared skills and command-style workflows
+- `.agents/agents/` is the canonical source for markdown agent definitions
+- `.claude/skills/` and `.claude/agents/` are compatibility symlinks into `.agents/`
+- `.codex/agents/` mirrors `.agents/agents/` for Codex subagent roles
+- shared reusable skills that any agent host should discover must live under `.agents/skills/` as real `SKILL.md` files with YAML frontmatter; agent wrappers should not exist
 
-Prefer updating `.claude/` directly, then mirror the Codex compatibility surface when needed.
-Because `.agents/skills/` resolves to the same folder, new skills added in either path appear
-in both places automatically.
+Prefer updating `.agents/` directly, then mirror host-specific adapter surfaces only when needed.
 
 See `process/context/all-context.md` for project-specific coding preferences and conventions.
 
@@ -43,9 +40,9 @@ Read these files as needed:
 
 Reference docs (harness methodology, not project-specific):
 
-- `.claude/skills/vc-generate-plan/references/example-simple-prd.md` - Reference for simple plan structure
-- `.claude/skills/vc-generate-plan/references/example-complex-prd.md` - Reference for complex plan depth
-- `.claude/skills/vc-generate-phase-program/references/program-goal-charter-template.md` - Program Goal Charter template for phase programs
+- `.agents/skills/vc-generate-plan/references/example-simple-prd.md` - Reference for simple plan structure
+- `.agents/skills/vc-generate-plan/references/example-complex-prd.md` - Reference for complex plan depth
+- `.agents/skills/vc-generate-phase-program/references/program-goal-charter-template.md` - Program Goal Charter template for phase programs
 
 ### Orchestrator Role (Main Codex Session)
 
@@ -98,18 +95,18 @@ Before substantial planning or implementation work, consult:
 
 ### Core Protocol
 
-The complete RIPER-5 protocol is defined in the real agent files at `.claude/agents/` and mirrored
+The complete RIPER-5 protocol is defined in the canonical markdown agent files at `.agents/agents/` and mirrored
 for Codex through `.codex/agents/`:
 
-- [.claude/agents/vc-research-agent.md](.claude/agents/vc-research-agent.md)
-- [.claude/agents/vc-spec-agent.md](.claude/agents/vc-spec-agent.md) — SPEC: product-discovery requirements doc before INNOVATE
-- [.claude/agents/vc-innovate-agent.md](.claude/agents/vc-innovate-agent.md)
-- [.claude/agents/vc-plan-agent.md](.claude/agents/vc-plan-agent.md)
-- [.claude/agents/vc-validate-agent.md](.claude/agents/vc-validate-agent.md) — VALIDATE: convert plan to executable contract before EXECUTE
-- [.claude/agents/vc-execute-agent.md](.claude/agents/vc-execute-agent.md)
-- [.claude/agents/vc-fast-mode-agent.md](.claude/agents/vc-fast-mode-agent.md)
-- [.claude/agents/vc-update-process-agent.md](.claude/agents/vc-update-process-agent.md)
-- [.claude/agents/vc-quick-fix-agent.md](.claude/agents/vc-quick-fix-agent.md) — QUICK FIX lane: lightweight lane for small low-risk changes
+- [.agents/agents/vc-research-agent.md](.agents/agents/vc-research-agent.md)
+- [.agents/agents/vc-spec-agent.md](.agents/agents/vc-spec-agent.md) — SPEC: product-discovery requirements doc before INNOVATE
+- [.agents/agents/vc-innovate-agent.md](.agents/agents/vc-innovate-agent.md)
+- [.agents/agents/vc-plan-agent.md](.agents/agents/vc-plan-agent.md)
+- [.agents/agents/vc-validate-agent.md](.agents/agents/vc-validate-agent.md) — VALIDATE: convert plan to executable contract before EXECUTE
+- [.agents/agents/vc-execute-agent.md](.agents/agents/vc-execute-agent.md)
+- [.agents/agents/vc-fast-mode-agent.md](.agents/agents/vc-fast-mode-agent.md)
+- [.agents/agents/vc-update-process-agent.md](.agents/agents/vc-update-process-agent.md)
+- [.agents/agents/vc-quick-fix-agent.md](.agents/agents/vc-quick-fix-agent.md) — QUICK FIX lane: lightweight lane for small low-risk changes
 - `.codex/agents/*.toml` mirrors the same agent roster for Codex
 
 The orchestrator operates outside the RIPER-5 phase modes. It routes, delegates, and monitors.
@@ -152,7 +149,7 @@ Intent clarification: Before auto-routing, the orchestrator scores request ambig
 silently. Ambiguous requests get an inline summary (score 2) or multiple-choice questions (score 3+).
 
 When the user explicitly invokes one of the mode names or command names from the previous
-`.claude` workflow, prefer the corresponding real agent definition in `.claude/agents/` /
+legacy `.claude` workflow, prefer the corresponding real agent definition in `.agents/agents/` /
 `.codex/agents/` or the surviving real skill in `.agents/skills/`.
 
 ### Engineering Standards
@@ -265,7 +262,7 @@ files are added, for example UI patterns or deployment procedures, agents automa
 
 ## Available Workflow Skills
 
-Canonical workflow logic lives in `.agents/skills/` / `.claude/skills/`.
+Canonical workflow logic lives in `.agents/skills/`.
 Claude command files are compatibility aliases when they still exist.
 
 ### Workflow Ownership
@@ -327,8 +324,8 @@ unchanged and are not part of the Codex skill compatibility surface.
 ## Mode Agents (Codex Compatibility)
 
 Codex provides specialized agents for each RIPER-5 mode through `.codex/agents/*.toml`.
-Agent identity lives only in `.claude/agents/*.md` and `.codex/agents/*.toml`. Do not create
-or preserve agent-wrapper skills under `.claude/skills/` or `.agents/skills/`.
+Agent identity lives in `.agents/agents/*.md` and `.codex/agents/*.toml`. `.claude/agents/` is a compatibility link. Do not create
+or preserve agent-wrapper skills under `.agents/skills/`.
 
 Codex agent triggering is manual/tool-driven: use `spawn_agent` with the relevant
 `agent_type` when the user explicitly asks for delegation, a RIPER-5 mode, or parallel
@@ -391,12 +388,12 @@ orchestrator or by execute-agent when specialized work is needed.
 
 During EXECUTE phase:
 
-- [.claude/agents/vc-tester.md](.claude/agents/vc-tester.md) - Diff-aware test verification. Maps changed files to test files, runs only affected tests. Invoke after implementation sub-steps complete.
-- [.claude/agents/vc-debugger.md](.claude/agents/vc-debugger.md) - Root cause analysis for bugs. Evidence-before-hypothesis methodology. Can also be invoked standalone.
-- [.claude/agents/vc-code-reviewer.md](.claude/agents/vc-code-reviewer.md) - Production-readiness review. Edge case scouting, N+1 detection, auth path validation. Invoke as pre-PR quality gate.
-- [.claude/agents/vc-code-simplifier.md](.claude/agents/vc-code-simplifier.md) - Post-implementation refactor for clarity without behavior change. Invoke after code-reviewer passes.
-- [.claude/agents/vc-ui-ux-designer.md](.claude/agents/vc-ui-ux-designer.md) - Design-aware frontend implementation. Invoke for UI/UX tasks within execute phase.
-- [.claude/agents/vc-git-manager.md](.claude/agents/vc-git-manager.md) - Clean conventional commits. Invoke for git operations.
+- [.agents/agents/vc-tester.md](.agents/agents/vc-tester.md) - Diff-aware test verification. Maps changed files to test files, runs only affected tests. Invoke after implementation sub-steps complete.
+- [.agents/agents/vc-debugger.md](.agents/agents/vc-debugger.md) - Root cause analysis for bugs. Evidence-before-hypothesis methodology. Can also be invoked standalone.
+- [.agents/agents/vc-code-reviewer.md](.agents/agents/vc-code-reviewer.md) - Production-readiness review. Edge case scouting, N+1 detection, auth path validation. Invoke as pre-PR quality gate.
+- [.agents/agents/vc-code-simplifier.md](.agents/agents/vc-code-simplifier.md) - Post-implementation refactor for clarity without behavior change. Invoke after code-reviewer passes.
+- [.agents/agents/vc-ui-ux-designer.md](.agents/agents/vc-ui-ux-designer.md) - Design-aware frontend implementation. Invoke for UI/UX tasks within execute phase.
+- [.agents/agents/vc-git-manager.md](.agents/agents/vc-git-manager.md) - Clean conventional commits. Invoke for git operations.
 
 Note: shared review methodology has been absorbed into the `vc-code-reviewer` agent prompt. Route to the agent directly instead of a separate review-owner workflow when the agent is the appropriate path.
 
@@ -417,7 +414,7 @@ Cross-phase utilities (skills, not agents):
 Do not assume `.claude/skills/` is scanned directly by Codex. For Codex compatibility, make
 sure the relevant capability is exposed under
 [`.agents/skills/`](.agents/skills).
-In this repo, `.agents/skills/` is already a symlink to the canonical `.claude/skills/` tree,
+In this repo, `.agents/skills/` is the canonical tree and `.claude/skills/` is the compatibility link,
 so add or update real skill folders there rather than copying them into `.codex/`.
 
 ## Routing Protocol
@@ -669,9 +666,8 @@ Quick Iteration (FAST MODE):
 
 Rules not loading: Verify `process/development-protocols/` exists and that the hook/config path resolution still points to the canonical protocol files.
 
-Subagent not found: Ensure agent files exist in `.claude/agents/` and mirrored TOML exists in
-`.codex/agents/`. Shared skills should exist under `.claude/skills/` through the `.agents/skills/`
-symlink, but agent wrappers should not exist there.
+Subagent not found: Ensure agent files exist in `.agents/agents/` and mirrored TOML exists in
+`.codex/agents/`. Shared skills should exist under `.agents/skills/`; `.claude/skills/` should resolve there as a compatibility link, but agent wrappers should not exist there.
 
 Plan conflicts: Date-stamped filenames should prevent overwrites; check git status.
 
@@ -682,9 +678,9 @@ Cross-agent issues: Claude Code and Codex must use the same `process/` folder st
 
 ## Resources
 
-- Agent Definitions: `.claude/agents/*.md`
+- Agent Definitions: `.agents/agents/*.md`
 - Codex Agent Mirrors: `.codex/agents/*.toml`
-- Workflow Skills: real reusable skills under `.claude/skills/*/SKILL.md`, exposed to Codex through `.agents/skills/`
+- Workflow Skills: real reusable skills under `.agents/skills/*/SKILL.md`, with `.claude/skills/` as a compatibility link
 - Plans: `process/general-plans/active/` (active general), `process/general-plans/{completed,backlog,reports,references}/` (general archives/supporting artifacts), `process/features/*/active/` (feature-scoped)
 - Features: `process/features/`
 - Context: `process/context/all-context.md` router plus relevant `process/context/` files/groups

@@ -188,7 +188,7 @@ phase plan checklist. Plan-agent in supplement mode:
 This is Phase Loop Progress step 1b. It runs after 1a (research) and before
 step 2 (validate). It is never skipped — it either adds items or marks n/a.
 
-The validate-contract must follow full `.claude/skills/vc-validate-findings/references/example-validate-output.md`
+The validate-contract must follow full `.agents/skills/vc-validate-findings/references/example-validate-output.md`
 format — partial contract (missing Plan updates applied / Execute-agent instructions / Test gates)
 is treated as a placeholder.
 
@@ -225,7 +225,7 @@ After Step 3 completion (PHASE_COMPLETE: PLAN-SUPPLEMENT signal received): tick 
 - **Outer PVL** (umbrella plan present AND validate-contract absent from all phase plans): spawn vc-validate-agent agent-team — one vc-validate-agent per phase plan running concurrently. See behavior-reference Section 8 §Outer PVL for coordination token and registry initialization.
 - **Inner PVL** (phase plan has existing validate-contract and Inner Loop Refresh Note triggers re-run): spawn single vc-validate-agent for the specific phase plan.
 
-**Loop bookkeeping (vc-autoresearch):** the plan-validate-fix loop is run by the `vc-autoresearch` skill (`domain: plan`) as its shared bookkeeper — iteration counter, plateau detection, iteration report, regression flag, 10-cycle cap. The validate step itself fans out in parallel via `vc-validate-findings` (Layer 1 dimension agents + Layer 2 feasibility agents), owned by vc-validate-agent. When a CONDITIONAL/BLOCKED gap set spans independent plan sections, the orchestrator spawns **multiple parallel plan-fix agents**, one per independent gap group, partitioned so no two agents edit the same plan region; when gaps are interdependent or touch one section, fall back to a single plan-fix agent. See `.claude/skills/vc-autoresearch/SKILL.md` §PVL Wiring. **The ORCHESTRATOR executes this bookkeeping itself at every cycle boundary — no agent runs it implicitly; per-verdict routing table: §PVL/EVL Loop Routing.**
+**Loop bookkeeping (vc-autoresearch):** the plan-validate-fix loop is run by the `vc-autoresearch` skill (`domain: plan`) as its shared bookkeeper — iteration counter, plateau detection, iteration report, regression flag, 10-cycle cap. The validate step itself fans out in parallel via `vc-validate-findings` (Layer 1 dimension agents + Layer 2 feasibility agents), owned by vc-validate-agent. When a CONDITIONAL/BLOCKED gap set spans independent plan sections, the orchestrator spawns **multiple parallel plan-fix agents**, one per independent gap group, partitioned so no two agents edit the same plan region; when gaps are interdependent or touch one section, fall back to a single plan-fix agent. See `.agents/skills/vc-autoresearch/SKILL.md` §PVL Wiring. **The ORCHESTRATOR executes this bookkeeping itself at every cycle boundary — no agent runs it implicitly; per-verdict routing table: §PVL/EVL Loop Routing.**
 | Steps 1–4 done | vc-execute-agent |
 | Step 6 (EVL) unchecked | Orchestrator runs EVL directly |
 | Step 7 (UPDATE PROCESS) unchecked | vc-update-process-agent |
@@ -843,7 +843,7 @@ Under /goal: canonical detection trigger is the `PHASE_COMPLETE: EXECUTE — ...
 3. Route to vc-update-process-agent with the EVL HANDOFF SUMMARY block in the handoff prompt.
 4. Under /goal: all EVL steps are autonomous (no user gate) unless a EVL gate cannot be resolved after 10 execute-validate-fix loops — matching the behavior-reference Section 6 canonical cap. After 10 cycles: accept the gap as a known-gap, record in the phase report's ## Test Infra Gaps Found section, and continue.
 
-**Loop bookkeeping (vc-autoresearch):** the execute-validate-fix loop is run by the `vc-autoresearch` skill (`domain: tests`) as its shared bookkeeper — it owns the iteration counter, plateau/regression detection, the TSV log, and the 10-cycle cap. vc-tester owns which validate-contract gate commands to run; orchestrator owns routing. When multiple independent gates fail across non-overlapping file groups, the orchestrator spawns **multiple parallel execute-fix agents** (vc-execute-agent in supplement mode), one per failing gate / file group, partitioned so no two agents edit the same file; when failing gates share files or a single root cause, fall back to a single execute-fix agent. See `.claude/skills/vc-autoresearch/SKILL.md` §EVL Wiring. **The ORCHESTRATOR executes this bookkeeping itself at every cycle boundary — no agent runs it implicitly; per-event routing table: §PVL/EVL Loop Routing.**
+**Loop bookkeeping (vc-autoresearch):** the execute-validate-fix loop is run by the `vc-autoresearch` skill (`domain: tests`) as its shared bookkeeper — it owns the iteration counter, plateau/regression detection, the TSV log, and the 10-cycle cap. vc-tester owns which validate-contract gate commands to run; orchestrator owns routing. When multiple independent gates fail across non-overlapping file groups, the orchestrator spawns **multiple parallel execute-fix agents** (vc-execute-agent in supplement mode), one per failing gate / file group, partitioned so no two agents edit the same file; when failing gates share files or a single root cause, fall back to a single execute-fix agent. See `.agents/skills/vc-autoresearch/SKILL.md` §EVL Wiring. **The ORCHESTRATOR executes this bookkeeping itself at every cycle boundary — no agent runs it implicitly; per-event routing table: §PVL/EVL Loop Routing.**
 
 Under /goal autonomous execution: orchestrator emits and records `PHASE_COMPLETE: EVL — EVL HANDOFF SUMMARY emitted; preliminary packet written` to advance from Step 6 → Step 7 (UPDATE PROCESS).
 
@@ -858,24 +858,24 @@ This section closes the F2 gap documented in behavior-reference Section 6.
 The core validator suite runs after every phase that touches harness artifacts:
 
 ```
-node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
-node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
-node .claude/skills/vc-audit-plans/scripts/validate-plan-inventory.mjs     # (also conditional: run when plan inventory changed)
-node .claude/skills/vc-audit-vc/scripts/validate-guide-sync.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-protocol-wiring.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-skill-invocation-wiring.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-agent-frontmatter.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-skills.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
+node .agents/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+node .agents/skills/vc-audit-plans/scripts/validate-plan-inventory.mjs     # (also conditional: run when plan inventory changed)
+node .agents/skills/vc-audit-vc/scripts/validate-guide-sync.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-protocol-wiring.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-skill-invocation-wiring.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-agent-frontmatter.mjs
 git diff --check                                                             # (merge-conflict marker check)
 ```
 
 These additional validators are available for phase programs and plan artifact quality checks:
 
 ```
-node .claude/skills/vc-generate-plan/scripts/validate-plan-artifact.mjs <plan.md>      # direct plan structure
-node .claude/skills/vc-generate-phase-program/scripts/validate-umbrella-artifact.mjs <umbrella-plan.md>   # umbrella plan structure
-node .claude/skills/vc-generate-phase-program/scripts/validate-phase-stub.mjs <phase-plan.md>             # phase stub structure
+node .agents/skills/vc-generate-plan/scripts/validate-plan-artifact.mjs <plan.md>      # direct plan structure
+node .agents/skills/vc-generate-phase-program/scripts/validate-umbrella-artifact.mjs <umbrella-plan.md>   # umbrella plan structure
+node .agents/skills/vc-generate-phase-program/scripts/validate-phase-stub.mjs <phase-plan.md>             # phase stub structure
 ```
 
 Run `validate-umbrella-artifact.mjs` after creating a new program umbrella plan. Run `validate-phase-stub.mjs` after generating phase stubs. These are not part of the core 5-validator suite but should be run by execute-agents operating within a phase program.
@@ -904,7 +904,7 @@ Ambiguous requests get an inline summary (score 2) or multiple-choice questions 
 
 ### 0. Skill Discovery (Do This First)
 
-Before routing, run `node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs` (reads
+Before routing, run `node .agents/skills/vc-context-discovery/scripts/discover-skills.mjs` (reads
 the generated skills catalog inventory) to list every skill grouped by layer with its
 trigger keywords. Match keywords from the user request to surface relevant skills, and attach
 candidate skill names to the subagent prompt.

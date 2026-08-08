@@ -73,8 +73,8 @@ Use when initializing a new project's context layer from scratch:
 
 ## Rules
 
-- Treat `.claude/skills/` as canonical; `.agents/skills/` is the Codex discovery symlink.
-- Treat `.claude/skills/vc-audit-context/references/skill-routing-policy.json` as the explicit allowlist for intentionally non-routed shared skills.
+- Treat `.agents/skills/` as canonical; `.claude/skills/` is the compatibility link.
+- Treat `.agents/skills/vc-audit-context/references/skill-routing-policy.json` as the explicit allowlist for intentionally non-routed shared skills.
 - Do not move large context files without updating `process/context/all-context.md`.
 - Do not delete compatibility wrappers unless no current reference points to them.
 - Keep context groups durable-domain based, not one group per temporary feature.

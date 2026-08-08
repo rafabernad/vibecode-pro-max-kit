@@ -1,9 +1,9 @@
 {
   "version": "3.2.5",
   "include": [
-    ".claude/agents/**",
-    ".claude/skills/**",
-    ".claude/skills/**/.??*",
+    ".agents/agents/**",
+    ".agents/skills/**",
+    ".agents/skills/**/.??*",
     ".claude/hooks/**",
     ".claude/settings.json",
     ".codex/**",
@@ -31,13 +31,13 @@
     "**/*.test.cjs",
     "**/*.test.mjs",
     "**/*.test.md",
-    ".claude/skills/vc-debug/scripts/find-polluter.test.md",
-    ".claude/skills/vc-review-situation/scripts/review-situation-scan.test.cjs",
+    ".agents/skills/vc-debug/scripts/find-polluter.test.md",
+    ".agents/skills/vc-review-situation/scripts/review-situation-scan.test.cjs",
     ".claude/hooks/scout-block/tests/**",
     ".codex/hooks/scout-block/tests/**",
-    ".claude/skills/vc-agent-browser/scripts/package-lock.json",
-    ".claude/skills/vc-sequential-thinking/package.json",
-    ".claude/skills/vc-sequential-thinking/.gitignore"
+    ".agents/skills/vc-agent-browser/scripts/package-lock.json",
+    ".agents/skills/vc-sequential-thinking/package.json",
+    ".agents/skills/vc-sequential-thinking/.gitignore"
   ],
   "strip": [],
   "merge": [
@@ -45,7 +45,8 @@
   ],
   "copyIfMissing": [],
   "symlinks": {
-    ".agents/skills": "../.claude/skills"
+    ".claude/skills": "../.agents/skills",
+    ".claude/agents": "../.agents/agents"
   },
   "kitOnly": [
     "README.md",

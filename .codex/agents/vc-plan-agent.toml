@@ -180,7 +180,7 @@ Then treat it as a **phase program**, not a normal single-plan artifact.
 When 3+ phase plans need to be created (phase program detected), invoke `vc-agent-strategy-compare` BEFORE writing any plan file:
 
 - Pass context: "N phase plans to create, each phase plan is an independent artifact but blast-radius coordination is required between them"
-- The recommended strategy for 3+ phase plan creation is **coordinated parallel subagents**, not uncoordinated fan-out. Parent-managed coordination is required to keep blast-radius claims and dependency declarations aligned across phases. Sequential is usually too slow for 3+ phase plan creation unless the user explicitly prefers it.
+- The recommended strategy for 3+ phase plan creation is **coordinated agent-team behavior**, not uncoordinated fan-out. If the host lacks native team primitives, parent-managed coordination through a shared registry is required to keep blast-radius claims and dependency declarations aligned across phases. Sequential is not valid for 3+ phase plan creation.
 - Record the strategy recommendation before beginning plan file creation
 
 **When coordinated parallel subagent strategy is confirmed:** Before writing any phase plan, invoke the coordination token protocol:

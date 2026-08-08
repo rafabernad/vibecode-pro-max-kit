@@ -68,14 +68,14 @@ See skill: invoke `vc-risk-evidence-pack` for the full 6-class definitions, 5-ar
 
 ## Agent Frontmatter Conventions
 
-All agent files at `.claude/agents/*.md` carry structured YAML frontmatter controlling
+All canonical markdown agent files at `.agents/agents/*.md` carry structured YAML frontmatter controlling
 runtime behavior. Fields in scope for this program:
 
 - `effort` — token-budget hint for the spawning model. Valid values: `low`, `medium`, `high`, `max`.
   Use `max` for opus-based execution agents (vc-execute-agent, vc-fast-mode-agent, vc-quick-fix-agent),
   `high` for planning/validation agents on sonnet, `medium` for lightweight agents, `low` for vc-git-manager.
 - `skills` — list of skill slugs preloaded into the agent context window. Each slug must resolve to a
-  real directory under `.claude/skills/`. Drop any slug that does not resolve; record as a known-gap
+  real directory under `.agents/skills/`. Drop any slug that does not resolve; record as a known-gap
   in the phase report.
 - `disallowedTools` — list of Claude tool names the agent may not invoke. Enforced by the spawning harness.
   Do not list a tool the agent legitimately needs. Reconcile against the agent's `tools:` grant first.

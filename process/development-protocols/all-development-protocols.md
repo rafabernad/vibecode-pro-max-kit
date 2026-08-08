@@ -49,7 +49,7 @@ Use this folder for durable, repo-specific operating instructions that must stay
 - `communication-standards.md`
   How agents write human-facing output: answer-first (BLUF), plain language, TL;DR, no filler. Single source of truth for output style; CLAUDE.md, AGENTS.md, prose-producing agents, and report/spec/closeout/clarify skills point here instead of restating it.
 - `vc-autoresearch-spec.md` (optional deep reference; `read_order: 7`, `required: false`)
-  Deeper design reference for the `vc-autoresearch` loop primitive (the find-gaps → fix → repeat bookkeeper wired into PVL and EVL): canonical domain configs, iteration-report frontmatter schema, and TSV log format. The operative contract is `.claude/skills/vc-autoresearch/SKILL.md`; this file is the design rationale behind it.
+  Deeper design reference for the `vc-autoresearch` loop primitive (the find-gaps → fix → repeat bookkeeper wired into PVL and EVL): canonical domain configs, iteration-report frontmatter schema, and TSV log format. The operative contract is `.agents/skills/vc-autoresearch/SKILL.md`; this file is the design rationale behind it.
 - `autopilot.md`
   Autopilot Mode protocol: trigger phrase detection, consolidated clarification round (one-round rule),
   provisional goal block format (9 fields, ≤4000 chars, EXECUTE CONSENT required), [MODE: AUTOPILOT | X]
@@ -60,7 +60,7 @@ Use this folder for durable, repo-specific operating instructions that must stay
 - `references/program-goal-charter-template.md`
   Blank and filled Program Goal Charter template for phase-program umbrella plans. Read when building
   an umbrella plan or needing the compressed session-goal block format. Canonical content also mirrored
-  at `.claude/skills/vc-generate-phase-program/references/program-goal-charter-template.md`.
+  at `.agents/skills/vc-generate-phase-program/references/program-goal-charter-template.md`.
 
 Note: Protocol procedures for intent clarification, parallel strategy scoring, validate fan-out,
 and closeout are now in the corresponding skills. See `process/context/all-context.md` skill
@@ -76,4 +76,4 @@ registry for skill names (`vc-intent-clarify`, `vc-agent-strategy-compare`, `vc-
   leading YAML frontmatter (`name: protocol:<slug>`, `description`, `date`,
   `metadata: {node_type, type: protocol, read_order, required, read_when}`) so `vc-context-discovery`
   can route on it. `note.md` is the single intentional exception (raw scratch dump). Enforced by
-  `node .claude/skills/vc-audit-context/scripts/validate-protocol-discovery.mjs` (run via `vc-audit-context`).
+  `node .agents/skills/vc-audit-context/scripts/validate-protocol-discovery.mjs` (run via `vc-audit-context`).

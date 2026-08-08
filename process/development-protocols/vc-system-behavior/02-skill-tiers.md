@@ -111,7 +111,7 @@ These skills are required within specific phases. Skipping one is a phase compli
 | vc-generate-plan | PLAN — all plan creates and updates go through this skill's schema |
 | vc-generate-phase-program | PLAN — when shape is PHASE PROGRAM, invoke this before writing any file |
 | vc-validate-findings | PVL/V2 — both layers are mandatory |
-| vc-autoresearch | PVL (runs the plan-validate-fix loop as bookkeeper, `domain: plan`) and EVL (runs the execute-validate-fix loop, `domain: tests`). Owns the iteration counter, plateau/regression detection, TSV log, and 10-cycle cap; phase agents keep their own gate/supplement mechanics. Also usable standalone for spec/doc/UX hardening. See `.claude/skills/vc-autoresearch/SKILL.md` §PVL Wiring / §EVL Wiring. |
+| vc-autoresearch | PVL (runs the plan-validate-fix loop as bookkeeper, `domain: plan`) and EVL (runs the execute-validate-fix loop, `domain: tests`). Owns the iteration counter, plateau/regression detection, TSV log, and 10-cycle cap; phase agents keep their own gate/supplement mechanics. Also usable standalone for spec/doc/UX hardening. See `.agents/skills/vc-autoresearch/SKILL.md` §PVL Wiring / §EVL Wiring. |
 | vc-sequential-thinking | PVL/V3 (conflicting verdicts), EXECUTE (ambiguous step ordering) |
 | vc-predict | INNOVATE (before Decision Summary), PLAN (COMPLEX plans, before checklist) |
 | vc-generate-closeout | UPDATE PROCESS (9-field closeout packet before archiving), EVL step 1 |

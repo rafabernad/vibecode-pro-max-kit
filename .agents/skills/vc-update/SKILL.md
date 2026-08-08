@@ -136,10 +136,10 @@ Print a summary with all collected results. Format:
 vc-update dry run: v{currentVersion} -> v{remoteVersion}
 
 FILES:
-  [modified]  .claude/agents/vc-execute-agent.md  (+12 -3)
+  [modified]  .agents/agents/vc-execute-agent.md  (+12 -3)
   [new]       .claude/hooks/lib/new-util.cjs
-  [removed]   .claude/skills/deprecated-skill/SKILL.md
-  [unchanged] .claude/agents/vc-debugger.md
+  [removed]   .agents/skills/deprecated-skill/SKILL.md
+  [unchanged] .agents/agents/vc-debugger.md
   ...
 
 MERGE (preserved, manual review needed):
@@ -149,11 +149,11 @@ COPY-IF-MISSING (skipped, already present):
   (none)
 
 SYMLINKS:
-  [ok]        .agents/skills -> ../.claude/skills
+  [ok]        .claude/skills -> ../.agents/skills
   [will fix]  .codex/hooks -> ../.claude/hooks
 
 STALE WARNINGS: N paths failed the namespace guard (showing first 5 — see full compute-sync-plan output)
-  .claude/skills/my-custom-vc-tool/SKILL.md
+  .agents/skills/my-custom-vc-tool/SKILL.md
   ...
 
 Summary: 5 modified, 2 new, 1 removal, 1 merge skipped, 45 unchanged
@@ -322,21 +322,22 @@ Layout migration:
 
 **After printing the summary, run three post-update checks and print a NOTICE block:**
 
-**Check A — `.agents/skills` symlink vs real directory:**
+**Check A — `.claude/skills` compatibility link vs real directory:**
 
 ```bash
-[ -L .agents/skills ] && echo "symlink" || echo "real-dir"
+[ -L .claude/skills ] && echo "symlink" || echo "real-dir"
 ```
 
-If the result is `real-dir` (Windows fallback — a real directory instead of a symlink), re-sync it now so it stays current with the updated `.claude/skills/`:
+If the result is `real-dir` (Windows fallback — a real directory instead of a symlink), re-sync it now so it stays current with the canonical `.agents/skills/` tree:
 
 ```bash
-cp -r .claude/skills/. .agents/skills/
+rm -rf .claude/skills
+cp -r .agents/skills .claude/skills
 ```
 
-Print: `NOTICE: .agents/skills is a real directory (Windows fallback) — re-synced from .claude/skills/`
+Print: `NOTICE: .claude/skills is a real directory (Windows fallback) — re-synced from .agents/skills/`
 
-If it is a symlink, skip this step (the symlink already resolves to the updated `.claude/skills/`).
+If it is a symlink, skip this step (the compatibility link already resolves to the updated `.agents/skills/`).
 
 **Check B — `.claude/settings.json` merge-preserved hooks gap:**
 
@@ -405,11 +406,11 @@ After the NOTICE block, print:
 ```
 Recommended next step — run the five core validators:
 
-  node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
-  node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
-  node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
-  node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
-  node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs
+  node .agents/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
+  node .agents/skills/vc-audit-vc/scripts/validate-skills.mjs
+  node .agents/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
+  node .agents/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+  node .agents/skills/vc-context-discovery/scripts/discover-skills.mjs
 ```
 
 ## Rules

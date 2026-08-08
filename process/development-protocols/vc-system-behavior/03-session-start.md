@@ -242,11 +242,15 @@ When two strategies score equally, prefer the lower-cost option if scope or time
 
 ### Step 6.5 — Combined Clarification Gate (the single pause)
 
-This is the **one and only** user pause in session start. Present everything in a single structured multiple-choice ask (Claude Code's `AskUserQuestion` tool):
+This is the **one and only** user pause in session start. Present everything in a single structured multiple-choice ask using the best interactive primitive available in the host agent:
 
 - the intent restatement (Step 2) as the framing
 - the clarifying questions (Step 2) as question items
 - the strategy selection (Step 6) as one more question item — the 4 options, each labeled with its 7-signal score and cost estimate as selectable choices
+
+Preferred order:
+- native structured-question tool (`AskUserQuestion`, `request_user_input`, or equivalent)
+- otherwise one concise plain-text clarification block with the same choices
 
 The user answers all of it in one round-trip. There is no separate "confirm intent" then "confirm strategy" step — they are merged into this single ask.
 
@@ -260,7 +264,7 @@ Autopilot Clarification Round below. Auto-skip conditions apply only to the stan
 When an autopilot trigger phrase is detected (see `orchestration.md §Autopilot Trigger Routing`),
 Step 6.5 is replaced by the **Consolidated Autopilot Clarification Round**:
 
-- Issue exactly ONE `AskUserQuestion` call covering:
+- Issue exactly ONE structured clarification round covering:
   1. Intent restatement confirmation (scope, task name, entry phase)
   2. Hard-stop boundaries confirmation (three hard stops remain manual)
   3. Gate deviations (any gates the user wants to remain interactive — default: none)

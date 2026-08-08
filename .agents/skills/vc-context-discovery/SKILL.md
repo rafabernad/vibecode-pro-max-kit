@@ -71,7 +71,7 @@ and (with `--feature`) the feature folder, extracting ONLY the leading YAML fron
 block of each `.md` file (no whole-file reads):
 
 ```bash
-node .claude/skills/vc-context-discovery/scripts/discover-context.mjs [--feature <name>] [--json]
+node .agents/skills/vc-context-discovery/scripts/discover-context.mjs [--feature <name>] [--json]
 ```
 
 The script groups output into: context files with frontmatter, protocol files, feature
@@ -84,7 +84,7 @@ and avoids loading huge files into context.
 obviously map to a routing-table row, do not guess — let the index do the matching:
 
 ```bash
-node .claude/skills/vc-context-discovery/scripts/discover-context.mjs --match "update the user ORM model"
+node .agents/skills/vc-context-discovery/scripts/discover-context.mjs --match "update the user ORM model"
 ```
 
 This tokenizes the task and ranks context docs by overlap with their frontmatter `keywords`,
@@ -97,8 +97,8 @@ hand-authored — they live between `<!-- GENERATED:routing -->` / `<!-- /GENERA
 markers. Rebuild them after any context-org change:
 
 ```bash
-node .claude/skills/vc-context-discovery/scripts/discover-context.mjs --emit-routing   # rewrites the block
-node .claude/skills/vc-context-discovery/scripts/discover-context.mjs --check-routing  # lint: block in sync?
+node .agents/skills/vc-context-discovery/scripts/discover-context.mjs --emit-routing   # rewrites the block
+node .agents/skills/vc-context-discovery/scripts/discover-context.mjs --check-routing  # lint: block in sync?
 ```
 
 The hand-authored Task Routing Table (task-type → file) stays editorial and is NOT generated.
@@ -169,7 +169,7 @@ inner-loop agents:
 
 **`test-runner` multi-runner rule:** the pipe-delimited `bun test | vitest` value is a DISPLAY
 convention only. The phase-loop workflow template
-(`.claude/skills/vc-generate-phase-program/templates/phase-loop-workflow-template.js`) expands it into
+(`.agents/skills/vc-generate-phase-program/templates/phase-loop-workflow-template.js`) expands it into
 SEQUENTIAL test steps (`bun test` THEN `vitest`) — a literal `bun test | vitest` shell pipe is NEVER
 emitted or run. See `03-session-start.md` for the matching field table.
 

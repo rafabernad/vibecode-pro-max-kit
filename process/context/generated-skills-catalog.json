@@ -1,7 +1,7 @@
 {
   "owner": "audit-context",
   "generatedFrom": {
-    "skillsRoot": ".claude/skills",
+    "skillsRoot": ".agents/skills",
     "routingPolicy": ".claude/skills/vc-audit-context/references/skill-routing-policy.json",
     "canonicalRoutingSurfaces": [
       "AGENTS.md",

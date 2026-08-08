@@ -82,8 +82,8 @@ function printGroup(title, list) {
 
 console.log(`VC Skill Registry — ${catalog.skillCount} skills (grouped by layer)`);
 console.log("");
-console.log("Actor agents (agents, not skills — see .claude/agents/):");
-console.log("  (the RIPER-5 phase + specialist agents live in .claude/agents/, not .claude/skills/)");
+console.log("Actor agents (agents, not skills — see .agents/agents/):");
+console.log("  (the RIPER-5 phase + specialist agents live in .agents/agents/, not .agents/skills/)");
 console.log("");
 printGroup("Contract skills (own a workflow artifact/contract):", byLayer.contract);
 printGroup("Helper skills (improve how agents work, own no artifact):", byLayer.helper);

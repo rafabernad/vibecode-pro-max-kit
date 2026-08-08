@@ -132,7 +132,7 @@ The charter is program-specific intent and safety only, not workflow rules. Do N
 — those are governed by this protocol.
 
 Full blank template and filled-in reference example: invoke `vc-generate-phase-program` or read
-`.claude/skills/vc-generate-phase-program/references/program-goal-charter-template.md`.
+`.agents/skills/vc-generate-phase-program/references/program-goal-charter-template.md`.
 
 ## Program Setup Sequence
 
@@ -172,7 +172,7 @@ Each phase plan's `## Phase Loop Progress` section must track the canonical 7-st
 1. `1. RESEARCH` — research-agent: prior phase reports read, context loaded, plan drift checked, findings documented
 2. `2. INNOVATE` — innovate-agent: approach decided, Decision Summary written
 3. `3. PLAN-SUPPLEMENT` — plan-agent: gaps/pre-conditions from research/innovate written into checklist (or "n/a — research clean")
-4. `4. PVL` — vc-validate-agent: full V1-V7; validate-contract written per `.claude/skills/vc-validate-findings/references/example-validate-output.md`
+4. `4. PVL` — vc-validate-agent: full V1-V7; validate-contract written per `.agents/skills/vc-validate-findings/references/example-validate-output.md`
 5. `5. EXECUTE` — all checklist items done; per-section test gates run and green (or gaps documented)
 6. `6. EVL` — all EVL gates green; regression checked; follow-up stubs registered; EVL HANDOFF SUMMARY written
 7. `7. UPDATE-PROCESS` — phase report written, umbrella state updated, commit done

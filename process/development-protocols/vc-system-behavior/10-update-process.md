@@ -80,32 +80,32 @@ Surfaces stale, missing, or mis-classified plans before declaring the session co
 Run these after any agent, skill, or protocol change. You may not claim the update is complete until you report these results or explain exactly why one was intentionally skipped.
 
 ```bash
-node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
-node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
+node .agents/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-skills.mjs
 git diff --check
-node .claude/skills/vc-audit-vc/scripts/validate-guide-sync.mjs
-node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-guide-sync.mjs
+node .agents/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
 ```
 
 If context grouping changed:
 
 ```bash
-node .claude/skills/vc-generate-context/scripts/validate-all-context.mjs
+node .agents/skills/vc-generate-context/scripts/validate-all-context.mjs
 ```
 
 If plan inventory changed:
 
 ```bash
-node .claude/skills/vc-audit-plans/scripts/validate-plan-inventory.mjs
+node .agents/skills/vc-audit-plans/scripts/validate-plan-inventory.mjs
 ```
 
 If a phase program completed or umbrella state changed:
 
 ```bash
-node .claude/skills/vc-audit-plans/scripts/validate-umbrella-state.mjs
-node .claude/skills/vc-audit-plans/scripts/validate-phase-reports.mjs
-node .claude/skills/vc-audit-plans/scripts/validate-backlog-notes.mjs
+node .agents/skills/vc-audit-plans/scripts/validate-umbrella-state.mjs
+node .agents/skills/vc-audit-plans/scripts/validate-phase-reports.mjs
+node .agents/skills/vc-audit-plans/scripts/validate-backlog-notes.mjs
 ```
 
 > Run these when a phase program completed or umbrella state changed. Skip any that does not apply to the current change (e.g. backlog-notes runs only when a phase program completed) and record the skip reason.
@@ -160,7 +160,7 @@ Count signals from these 5 sources. Use the exact threshold phrases below — do
 
 **Signal sources:**
 - **(a)** Files touched: 1–4 files = 0 signal; 5+ files = 1 signal
-- **(b1)** `process/development-protocols/`, `.claude/agents/`, or `.claude/skills/` changed = 1 signal
+- **(b1)** `process/development-protocols/`, `.agents/agents/`, or `.agents/skills/` changed = 1 signal
 - **(b2)** `README.md`, `AGENTS.md`, or `CLAUDE.md` changed = 1 additional signal (max 2 from b)
 - **(c)** 3 or more memory-worthy observations = 1 signal. Memory-worthy means: user corrected agent behavior, a known gap was found, a new pattern was established, or a feedback-like observation was made.
 - **(d)** New feature folder created or deleted = 1 signal
