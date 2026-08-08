@@ -64,7 +64,7 @@ For new or newly touched direct `*_PLAN_*.md` files, include all of the followin
 - `Touchpoints` — files, packages, or services that will be changed or read
 - `Public Contracts` — interfaces, APIs, schemas, or behaviors visible to other packages or callers
 - `Blast Radius` — the scope of change: how many files, which packages, and what risk class
-- `Verification Evidence` — table with columns `| Gate / Scenario | Strategy | Proves SPEC criterion |`; each row maps a test gate to the SPEC acceptance criterion it proves and the strategy (Fully-Automated / Hybrid / Agent-Probe)
+- `Verification Evidence` — table with columns `| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |`; each row maps a test gate to the SPEC acceptance criterion it proves, the proving strategy (Fully-Automated / Hybrid / Agent-Probe), and the evidence class (`product-behavior` / `integration-runtime` / `harness-process` / `artifact-certification`)
 - `Test Infra Improvement Notes` — placeholder at plan-write time ("(none identified yet)"); updated with test infrastructure gaps found during vc-test-coverage-plan and EVL
 - `Resume and Execution Handoff` — required sub-fields:
   1. selected plan file path

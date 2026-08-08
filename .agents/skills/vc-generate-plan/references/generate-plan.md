@@ -17,7 +17,7 @@ You MUST:
 - For complex plans, use a phase system with status markers and sequential RFCs
 - Keep standard complex work inside ONE file when one execution stream is enough
 - Split true phase programs into a plan set so each phase can be reattached, researched, executed, and validated independently across sessions
-- For direct `*_PLAN_*.md` plans, make execution trust explicit with first-class sections for `Touchpoints`, `Public Contracts`, `Blast Radius`, `Verification Evidence` (table: `| Gate / Scenario | Strategy | Proves SPEC criterion |`), `Test Infra Improvement Notes`, and `Resume and Execution Handoff`
+- For direct `*_PLAN_*.md` plans, make execution trust explicit with first-class sections for `Touchpoints`, `Public Contracts`, `Blast Radius`, `Verification Evidence` (table: `| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |`), `Test Infra Improvement Notes`, and `Resume and Execution Handoff`
 
 IMPORTANT FOR COMPLEX MODE: Use `.claude/skills/vc-generate-plan/references/example-complex-prd.md` as a reference for the expected level of depth and structure. Mirror that level of specificity when generating the complex plan.
 
@@ -227,7 +227,7 @@ After each phase, document:
 13. Touchpoints
 14. Public Contracts
 15. Blast Radius
-16. Verification Evidence — table: `| Gate / Scenario | Strategy | Proves SPEC criterion |`
+16. Verification Evidence — table: `| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |`
 17. Test Infra Improvement Notes — placeholder at plan-write time; updated during EVL
 18. Resume and Execution Handoff
 18. Cursor + RIPER-5 Guidance
@@ -374,7 +374,7 @@ For new or newly touched direct `*_PLAN_*.md` files, treat the following section
 - `Touchpoints`
 - `Public Contracts`
 - `Blast Radius`
-- `Verification Evidence` — table: `| Gate / Scenario | Strategy | Proves SPEC criterion |`
+- `Verification Evidence` — table: `| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |`
 - `Test Infra Improvement Notes` — placeholder at plan-write time; updated during EVL
 - `Resume and Execution Handoff`
 

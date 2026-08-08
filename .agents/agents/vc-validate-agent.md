@@ -244,11 +244,11 @@ supersedes: [prior contract date] ([prior contract type: outer-pvl | inner-pvl: 
 Parallel strategy: sequential | parallel-subagents | vc-team
 Rationale: [signal count and dominant signal]
 
-Test gates (C3 5-column table — ADDITIVE; existing consumers still parse the legacy line form below it):
+Test gates (C3 6-column table — ADDITIVE; existing consumers still parse the legacy line form below it):
 
-| criterion id | behavior | strategy | proving test | gap-resolution |
-|---|---|---|---|---|
-| [criterion id back-ref] | [developed behavior proven] | Fully-Automated \| Hybrid \| Agent-Probe | [exact proving test/command/scenario] | [A \| B \| C \| D] |
+| criterion id | behavior | strategy | evidence class | proving test | gap-resolution |
+|---|---|---|---|---|---|
+| [criterion id back-ref] | [developed behavior proven] | Fully-Automated \| Hybrid \| Agent-Probe | product-behavior \| integration-runtime \| harness-process \| artifact-certification | [exact proving test/command/scenario] | [A \| B \| C \| D] |
 
 gap-resolution legend:
 - A — proven now (gate passes in this cycle)
@@ -257,6 +257,8 @@ gap-resolution legend:
 - D — backlog test-building stub (named residual; keep-active; continue)
 
 C-4 reconciliation: the `strategy:` column carries ONLY the 3 proving strategies (Fully-Automated / Hybrid / Agent-Probe). Known-Gap is NEVER a `strategy:` value — it is a named residual row carried via gap-resolution D, never a strategy that proves a behavior.
+
+Evidence-class rule: `product-behavior` and `integration-runtime` are admissible as primary proof for shipped behavior. `harness-process` and `artifact-certification` may document helper integrity or process compliance, but they do NOT by themselves prove the product acceptance criterion named in the row.
 
 Legacy line form (retained so existing validate-contract consumers still parse):
 - [area]: [Fully-automated: command] | [hybrid: command + precondition] | [agent-probe: description] | [known-gap: documented]

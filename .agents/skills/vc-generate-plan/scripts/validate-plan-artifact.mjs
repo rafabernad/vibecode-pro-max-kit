@@ -49,6 +49,17 @@ function hasSection(text, name) {
   return new RegExp(`^##\\s+${name}\\b`, "im").test(text);
 }
 
+function getSectionBody(text, name) {
+  const match = text.match(
+    new RegExp(`^##\\s+${name}\\b[\\t ]*\\n([\\s\\S]*?)(?=^##\\s+|\\Z)`, "im"),
+  );
+  return match ? match[1] : "";
+}
+
+function hasEvidenceHeader(text, headerPattern) {
+  return new RegExp(`\\|\\s*${headerPattern}\\s*\\|`, "i").test(text);
+}
+
 function validatePlan(relPath) {
   if (!exists(relPath)) {
     fail(`${relPath} missing`);
@@ -124,6 +135,24 @@ function validatePlan(relPath) {
     if (!hasSection(text, "Blast Radius")) warn(`${relPath} is missing Blast Radius section`);
     if (!hasSection(text, "Verification Evidence")) warn(`${relPath} is missing Verification Evidence section`);
     if (!/Resume and Execution Handoff/i.test(text)) warn(`${relPath} is missing Resume and Execution Handoff section`);
+    if (hasSection(text, "Verification Evidence")) {
+      const body = getSectionBody(text, "Verification Evidence");
+      if (!hasEvidenceHeader(body, "Gate / Scenario")) {
+        warn(`${relPath} Verification Evidence is missing the 'Gate / Scenario' column`);
+      }
+      if (!hasEvidenceHeader(body, "Strategy")) {
+        warn(`${relPath} Verification Evidence is missing the 'Strategy' column`);
+      }
+      if (!hasEvidenceHeader(body, "Evidence class")) {
+        warn(`${relPath} Verification Evidence is missing the 'Evidence class' column`);
+      }
+      if (!hasEvidenceHeader(body, "Proves SPEC criterion")) {
+        warn(`${relPath} Verification Evidence is missing the 'Proves SPEC criterion' column`);
+      }
+      if (/harness-process|artifact-certification/i.test(body) && !/support|helper|integrity|meta|process/i.test(body)) {
+        warn(`${relPath} Verification Evidence uses harness/artifact evidence without helper-integrity labeling`);
+      }
+    }
   }
   if (legacyPlan) {
     if (!/primary execute anchor|execute anchor/i.test(text)) {

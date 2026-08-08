@@ -152,6 +152,7 @@ Part D: `## Verification Evidence` must include representative test scenarios, n
 |---|---|
 | Gate / scenario | The test command (exact) plus the representative scenario it proves |
 | Strategy | One of `automated` / `hybrid` / `agent-probe` (or `known-gap` for residual items) |
+| Evidence class | One of `product-behavior`, `integration-runtime`, `harness-process`, or `artifact-certification` |
 | Proves SPEC criterion | The SPEC acceptance-criterion id this gate proves (requirement→test traceability) |
 
 Every gate MUST reference the SPEC acceptance-criterion id it proves, closing requirement→test traceability from the plan side. A gate with no linked criterion id is a plan quality failure.
@@ -223,7 +224,7 @@ Auto-detect using Large Program Detection signals. Do not ask the user unless si
 - `## Touchpoints` — every file to be created or modified
 - `## Public Contracts` — API surfaces, schema changes, exported types affected
 - `## Blast Radius` — packages and services that can break
-- `## Verification Evidence` — per-step test commands (exact) plus representative scenarios; each gate row links a `Strategy` (automated/hybrid/agent-probe) and the `Proves SPEC criterion` id it proves (requirement→test traceability)
+- `## Verification Evidence` — per-step test commands (exact) plus representative scenarios; each gate row links a `Strategy`, an `Evidence class`, and the `Proves SPEC criterion` id it proves (requirement→test traceability)
 - `## Test Infra Improvement Notes` — how to move agent-probe and known-gap tiers toward fully-automated
 - `## Resume and Execution Handoff` — last completed step, next step, test gate status
 
