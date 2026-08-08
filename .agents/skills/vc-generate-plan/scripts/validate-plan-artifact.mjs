@@ -60,6 +60,14 @@ function hasEvidenceHeader(text, headerPattern) {
   return new RegExp(`\\|\\s*${headerPattern}\\s*\\|`, "i").test(text);
 }
 
+function findEvidenceRows(body) {
+  return body
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && !/^\|\s*-/.test(line))
+    .filter((line) => !/Gate \/ Scenario|Strategy|Evidence class|Proves SPEC criterion/i.test(line));
+}
+
 function validatePlan(relPath) {
   if (!exists(relPath)) {
     fail(`${relPath} missing`);
@@ -151,6 +159,14 @@ function validatePlan(relPath) {
       }
       if (/harness-process|artifact-certification/i.test(body) && !/support|helper|integrity|meta|process/i.test(body)) {
         warn(`${relPath} Verification Evidence uses harness/artifact evidence without helper-integrity labeling`);
+      }
+      const evidenceRows = findEvidenceRows(body);
+      const metaOnlyRows = evidenceRows.filter((row) => /harness-process|artifact-certification/i.test(row));
+      if (metaOnlyRows.length > 0 && !/Test Infra Improvement Notes/i.test(text)) {
+        warn(`${relPath} uses harness/artifact evidence rows but is missing Test Infra Improvement Notes`);
+      }
+      if (metaOnlyRows.length > 0 && !/justify|because|until|pending|temporary|interim|residual/i.test(body)) {
+        warn(`${relPath} uses harness/artifact evidence rows without an explicit short justification note`);
       }
     }
   }

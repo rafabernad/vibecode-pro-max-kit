@@ -177,7 +177,7 @@ If overlapping active plans exist, update or resume them instead of duplicating 
 - For COMPLEX: Update phase status (✅/🚧/⏳) and "What's Functional Now"
 - Run Change Management section if scope changed
 - Tighten data flow, dependency, risk, and test coverage sections if research uncovered gaps
-- For direct `*_PLAN_*.md` plans, ensure the artifact has explicit `Touchpoints`, `Public Contracts`, `Blast Radius`, `Verification Evidence` (table: `| Gate / Scenario | Strategy | Proves SPEC criterion |`), `Test Infra Improvement Notes`, and `Resume and Execution Handoff` sections
+- For direct `*_PLAN_*.md` plans, ensure the artifact has explicit `Touchpoints`, `Public Contracts`, `Blast Radius`, `Verification Evidence` (table: `| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |`), `Test Infra Improvement Notes`, and `Resume and Execution Handoff` sections
 - For legacy multi-file active work, choose one primary execute-anchor plan file path and note any supporting phase files explicitly for later EXECUTE handoff
 
 ### Step 3: Create New Plan (if not found)
@@ -260,7 +260,7 @@ If any check fails: fix the goal block before writing the umbrella plan.
 - Acceptance Criteria (testable)
 - Dependencies, Risks, Integration Notes
 - Data Flow, Failure Modes, and Verification Strategy when complexity warrants
-- For new or newly touched direct plans: `Touchpoints`, `Public Contracts`, `Blast Radius`, `Verification Evidence` (table: `| Gate / Scenario | Strategy | Proves SPEC criterion |`), `Test Infra Improvement Notes`, and `Resume and Execution Handoff`
+- For new or newly touched direct plans: `Touchpoints`, `Public Contracts`, `Blast Radius`, `Verification Evidence` (table: `| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |`), `Test Infra Improvement Notes`, and `Resume and Execution Handoff`
 
 For phase programs, prefer a feature folder up front and name phases explicitly instead of hiding
 the whole effort in one giant general plan.
@@ -295,6 +295,18 @@ Every SPEC acceptance criterion the plan carries MUST name its proving scenario 
 - a `strategy:` tag — exactly one of `Fully-Automated` | `Hybrid` | `Agent-Probe` (Known-Gap is never a `strategy:` value — it is the residual, recorded per the vacuous-green ban above).
 
 Each plan test gate must back-reference the criterion id it proves (criterion ↔ gate is bidirectional: the criterion names its `proven by:` gate, and the gate names the criterion it proves). A plan carrying a SPEC criterion with no `proven by:`/`strategy:` link is incomplete.
+
+#### Soft meta-evidence guard (Step B3)
+
+When a `Verification Evidence` row uses `harness-process` or `artifact-certification` as its `Evidence class`, the row MUST be labelled as helper/process integrity evidence rather than product proof, and the plan MUST add a short justification note explaining why stronger product-behavior or integration-runtime proof is not yet present.
+
+This is intentionally a soft gate at PLAN time:
+
+1. do NOT fail the plan solely for this pattern,
+2. do record it as a visible residual in `## Test Infra Improvement Notes`, and
+3. do expect VALIDATE to carry it forward as at least a `CONCERN` unless stronger proof is added.
+
+The goal is to prevent silent meta-testing without blocking legitimate incremental planning.
 
 #### TEST-SCENARIO-DISCOVERY (Step B2; cites TEST-SCENARIO-DISCOVERY row 48 + C1 row 18)
 
@@ -453,11 +465,12 @@ If the output is `0`: the section is MISSING. APPEND it to the plan file NOW bef
 Then run this bash command to verify the other required sections:
 
 ```bash
-grep -E "## Verification Evidence|## Resume and Execution Handoff|Proves SPEC criterion" <PLAN_PATH>
+grep -E "## Verification Evidence|## Resume and Execution Handoff|Evidence class|Proves SPEC criterion" <PLAN_PATH>
 ```
 
-If `## Verification Evidence` is absent: ADD it with a table header `| Gate / Scenario | Strategy | Proves SPEC criterion |`.
+If `## Verification Evidence` is absent: ADD it with a table header `| Gate / Scenario | Strategy | Evidence class | Proves SPEC criterion |`.
 If `## Resume and Execution Handoff` is absent: ADD it.
+If `Evidence class` is absent from the Verification Evidence table: UPDATE the table header and classify each row.
 If `Proves SPEC criterion` is absent from the Verification Evidence table: UPDATE the table header.
 
 Do NOT skip these bash commands. Cognitive memory is unreliable — the plan file is the source of truth.

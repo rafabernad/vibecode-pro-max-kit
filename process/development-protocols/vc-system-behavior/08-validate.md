@@ -150,6 +150,7 @@ Run `validate-plan-artifact.mjs` on the incoming plan file.
 
 - Exit code 1 AND missing required sections (Implementation Checklist, Blast Radius, Verification Evidence) → HARD STOP. Report BLOCKED. Route back to plan-agent to add missing sections.
 - Exit code 1 AND only metadata failures (missing Date/Status fields) → record as CONCERN, continue to V2.
+- Warning-only evidence-shape issues (for example: missing `Evidence class` column, or rows that use `harness-process` / `artifact-certification` without helper-integrity labeling) → record as CONCERN, continue to V2, and require explicit note in the validate-contract's `Open gaps` or `Accepted by` fields if the plan is still approved.
 
 ### Phase Program Check
 
