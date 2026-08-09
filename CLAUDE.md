@@ -42,6 +42,7 @@ Reference docs (harness methodology, not project-specific):
 - `.agents/skills/vc-generate-plan/references/example-simple-prd.md` - Reference for simple plan structure
 - `.agents/skills/vc-generate-plan/references/example-complex-prd.md` - Reference for complex plan depth
 - `.agents/skills/vc-generate-phase-program/references/program-goal-charter-template.md` - Program Goal Charter template for phase programs
+- `process/development-protocols/externalized-context.md` - Thin-repo protocol for keeping durable context in a separate Git repository
 
 ### Orchestrator Role (Main Claude Code Session)
 
@@ -163,6 +164,8 @@ aliases, and current implementation state. Before substantial planning or implem
 plus `process/development-protocols/all-development-protocols.md`.
 
 **Context routing discipline:** `all-*.md` entrypoints are routers, not the full knowledge. Agents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
+
+**Thin-repo compatibility:** A repository may keep its durable context outside the product repo. If `/.vc-project.json` sets `context.mode` to `external`, run `node scripts/vc-sync-external-context.mjs` before substantial work, then use the hydrated local `process/context/` tree as the authoritative session context.
 
 ---
 

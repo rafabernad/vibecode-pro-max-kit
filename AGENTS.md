@@ -35,6 +35,7 @@ Read these files as needed:
 - [plan-lifecycle.md](process/development-protocols/plan-lifecycle.md)
 - [phase-programs.md](process/development-protocols/phase-programs.md)
 - [context-maintenance.md](process/development-protocols/context-maintenance.md)
+- [externalized-context.md](process/development-protocols/externalized-context.md)
 - [autopilot.md](process/development-protocols/autopilot.md)
 - [communication-standards.md](process/development-protocols/communication-standards.md)
 
@@ -92,6 +93,8 @@ Before substantial planning or implementation work, consult:
 - `.claude/memory/MEMORY.md` for Claude-specific compatibility notes only; Codex does not have an equivalent repo-local project-memory mirror
 
 **Context routing discipline:** `all-*.md` entrypoints are routers, not the full knowledge. Agents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
+
+**Thin-repo compatibility:** A repository may externalize its durable context while preserving the same local path contract. If `/.vc-project.json` sets `context.mode` to `external`, sync the configured external context before substantial work with `node scripts/vc-sync-external-context.mjs`, then treat the hydrated local `process/context/` tree as authoritative for the current session.
 
 ### Core Protocol
 
@@ -220,6 +223,11 @@ a single doc exceeds roughly 800 lines with separable subtopics, or multiple age
 need only one slice of a large context file. Move/split one group at a time, use `all-*.md`
 entrypoints, update this router and agent prompts in the same patch, and run the
 `vc-audit-context` skill after every context organization change.
+
+Externalized-context note:
+
+- The authoritative source may be another Git repository, but agents still consume a local hydrated `process/context/` tree.
+- Keep the local path stable unless you are intentionally changing the global protocol.
 
 ### `process/features/`
 

@@ -1,6 +1,7 @@
 {
   "version": "3.2.5",
   "include": [
+    ".vc-project.json",
     ".agents/agents/**",
     ".agents/skills/**",
     ".agents/skills/**/.??*",
@@ -9,6 +10,7 @@
     ".codex/**",
     "CLAUDE.md",
     "AGENTS.md",
+    "scripts/**",
     "process/development-protocols/**",
     "process/context/generated-skills-catalog.json",
     "process/_seeds/**",
@@ -43,7 +45,9 @@
   "merge": [
     ".claude/settings.json"
   ],
-  "copyIfMissing": [],
+  "copyIfMissing": [
+    ".vc-project.json"
+  ],
   "symlinks": {
     ".claude/skills": "../.agents/skills",
     ".claude/agents": "../.agents/agents"

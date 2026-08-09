@@ -24,9 +24,10 @@ Use this folder for durable, repo-specific operating instructions that must stay
 4. `plan-lifecycle.md`
 5. `phase-programs.md`
 6. `context-maintenance.md`
-7. `communication-standards.md`
-8. `vc-autoresearch-spec.md` (optional deep reference — read only when designing or deeply understanding the autoresearch gap-loop primitive)
-9. `autopilot.md` — Autopilot Mode trigger phrases, consolidated clarification, provisional goal block format, mode markers, per-gate decision policy, hard stops, and deactivation rules. Read when: user says autopilot / autonomous mode / /autopilot trigger phrases, or when understanding orchestrator §Autonomy Mode integration.
+7. `externalized-context.md`
+8. `communication-standards.md`
+9. `vc-autoresearch-spec.md` (optional deep reference — read only when designing or deeply understanding the autoresearch gap-loop primitive)
+10. `autopilot.md` — Autopilot Mode trigger phrases, consolidated clarification, provisional goal block format, mode markers, per-gate decision policy, hard stops, and deactivation rules. Read when: user says autopilot / autonomous mode / /autopilot trigger phrases, or when understanding orchestrator §Autonomy Mode integration.
 
 ## File Roles
 
@@ -46,6 +47,9 @@ Use this folder for durable, repo-specific operating instructions that must stay
   How to run large multi-phase programs: umbrella plan, per-phase plan split, required 10-step loop, blocker handling, and foundation-vs-expansion boundaries.
 - `context-maintenance.md`
   How `process/context/` is organized, when to create or split groups, how to keep `all-context.md` accurate, and how long-lived knowledge differs from feature plans.
+- `externalized-context.md`
+  How to keep durable project context outside the product repo while preserving the existing local
+  `process/context/` contract for agents through a sync step.
 - `communication-standards.md`
   How agents write human-facing output: answer-first (BLUF), plain language, TL;DR, no filler. Single source of truth for output style; CLAUDE.md, AGENTS.md, prose-producing agents, and report/spec/closeout/clarify skills point here instead of restating it.
 - `vc-autoresearch-spec.md` (optional deep reference; `read_order: 7`, `required: false`)

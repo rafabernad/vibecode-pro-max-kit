@@ -118,6 +118,14 @@ function resolveGlobPatterns(patterns) {
   const matches = new Set();
 
   for (const pattern of patterns) {
+    if (isExactPath(pattern)) {
+      const fullPath = path.join(rootDir, pattern);
+      if (fs.existsSync(fullPath)) {
+        matches.add(pattern);
+      }
+      continue;
+    }
+
     // Detect dotfile-targeted patterns:
     //   "dir/**/.??*"           -> walk dir, include all dotfiles
     //   "dir/**/.gitkeep"       -> walk dir, include specific dotfile
@@ -275,6 +283,14 @@ function resolveGlob() {
   // 4. Resolve copyIfMissing patterns to actual file paths
   const copyIfMissingResolved = [];
   for (const pattern of copyIfMissingList) {
+    if (isExactPath(pattern)) {
+      const fullPath = path.join(rootDir, pattern);
+      if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+        copyIfMissingResolved.push(pattern);
+      }
+      continue;
+    }
+
     let results;
     try {
       results = fs.globSync(pattern, { cwd: rootDir, exclude: [] });

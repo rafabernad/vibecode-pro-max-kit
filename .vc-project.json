@@ -1,0 +1,11 @@
+{
+  "context": {
+    "mode": "repo",
+    "external": {
+      "repository": "",
+      "ref": "main",
+      "subpath": "process/context",
+      "syncInto": "process/context"
+    }
+  }
+}
