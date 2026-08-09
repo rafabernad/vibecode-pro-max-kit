@@ -91,13 +91,23 @@ function parseFrontmatter(file) {
   const text = read(file);
   const match = text.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
-  return Object.fromEntries(
-    match[1]
-      .split("\n")
-      .map((line) => line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/))
-      .filter(Boolean)
-      .map((match) => [match[1], match[2].replace(/^["']|["']$/g, "")]),
-  );
+  const fields = {};
+  let listKey = null;
+  for (const line of match[1].split("\n")) {
+    const topLevel = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (topLevel) {
+      const [, key, rawValue] = topLevel;
+      fields[key] = rawValue.replace(/^["']|["']$/g, "");
+      listKey = rawValue === "" ? key : null;
+      continue;
+    }
+    const item = line.match(/^\s+-\s+(.+)$/);
+    if (item && listKey) {
+      const value = item[1].replace(/^["']|["']$/g, "");
+      fields[listKey] = fields[listKey] ? `${fields[listKey]},${value}` : value;
+    }
+  }
+  return fields;
 }
 
 function normalizeForParity(text) {
@@ -192,7 +202,6 @@ if (!bareKitMode) {
   // Build a slug registry (context:{slug}) across all context docs first.
   const contextDocNames = new Set();
   for (const doc of contextDocs) {
-    if (doc === router) continue;
     const name = parseFrontmatter(doc).name;
     if (name) contextDocNames.add(name);
   }

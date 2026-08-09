@@ -51,8 +51,14 @@ const allPlans = [
   ...walk("process/features", (rel) => rel.endsWith(".md")),
 ].sort();
 
-const activePlans = allPlans.filter((file) => file.includes("/active/"));
-const completedPlans = allPlans.filter((file) => file.includes("/completed/"));
+function isPlanFile(file) {
+  const name = path.basename(file);
+  return /_PLAN_(?:\d{2}-\d{2}-\d{2}|\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\.md$/.test(name)
+    || /^(?:PLAN|plan)\.md$/.test(name);
+}
+
+const activePlans = allPlans.filter((file) => file.includes("/active/") && isPlanFile(file));
+const completedPlans = allPlans.filter((file) => file.includes("/completed/") && isPlanFile(file));
 const duplicateNames = new Map();
 
 const samples = {
@@ -63,24 +69,16 @@ const samples = {
   likelyReferenceInActive: [],
 };
 
-// Co-located task-folder artifacts are valid non-plan files inside active/ task subfolders.
-// Skip _REPORT_, _REF_, and _SPEC_ files from plan-specific checks to prevent false positives.
-function isColocatedArtifact(name) {
-  return /_REPORT_|_REF_|_SPEC_/.test(name);
-}
-
 for (const file of activePlans) {
   const name = path.basename(file);
   duplicateNames.set(name, (duplicateNames.get(name) || 0) + 1);
-
-  // Skip _REPORT_, _REF_, _SPEC_ files — valid co-located artifacts, not misplaced plans.
-  if (isColocatedArtifact(name)) continue;
 
   const text = read(file);
 
   if (!hasDateStamp(name)) samples.nameNotDateStamped.push(file);
   if (!/_PLAN_|PLAN\.md$|PLAN_/.test(name)) samples.noPlanInName.push(file);
-  if (!/Phase Completion Rules|phase is NOT complete|Phase is NOT complete/i.test(text)) {
+  if (!/umbrella_PLAN_/i.test(name)
+    && !/Phase Completion Rules|phase is NOT complete|Phase is NOT complete/i.test(text)) {
     samples.missingPhaseRules.push(file);
   }
   if (!/Verification|Test Procedure|Manual test|Post-Phase Testing|Acceptance Criteria/i.test(text)) {

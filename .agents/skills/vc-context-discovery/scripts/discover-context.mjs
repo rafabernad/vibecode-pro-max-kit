@@ -89,10 +89,16 @@ function readFrontmatter(relPath) {
   const top = {};
   const metadata = {};
   let inMetadata = false;
+  let listKey = null;
   for (let i = 1; i < end; i++) {
     const line = head[i];
     if (line.trim() === "" || line.trim().startsWith("#")) continue;
     const indent = line.length - line.trimStart().length;
+    const listItem = line.match(/^\s+-\s+(.+)$/);
+    if (listItem && listKey) {
+      top[listKey].push(stripQuotes(listItem[1].trim()));
+      continue;
+    }
     const m = line.trim().match(/^([A-Za-z0-9_-]+):(.*)$/);
     if (!m) continue;
     const key = m[1];
@@ -100,25 +106,33 @@ function readFrontmatter(relPath) {
 
     if (key === "metadata" && rawVal === "") {
       inMetadata = true;
+      listKey = null;
       continue;
     }
     if (inMetadata && indent >= 2) {
       metadata[key] = stripQuotes(rawVal);
     } else {
       inMetadata = false;
-      if (rawVal !== "") top[key] = stripQuotes(rawVal);
+      if (rawVal !== "") {
+        top[key] = stripQuotes(rawVal);
+        listKey = null;
+      } else if (key === "keywords" || key === "related") {
+        top[key] = [];
+        listKey = key;
+      } else {
+        listKey = null;
+      }
     }
   }
 
-  // keywords: comma-separated scalar -> array of lowercase terms
-  const keywords = (top.keywords ?? "")
-    .split(",")
+  // Accept both comma-separated scalars and YAML lists.
+  const keywords = (Array.isArray(top.keywords) ? top.keywords : `${top.keywords ?? ""}`.split(","))
     .map((k) => k.trim().toLowerCase())
     .filter(Boolean);
-  // related: inline YAML list `[context:a, context:b]` -> array of slug strings
-  const related = (top.related ?? "")
-    .replace(/^\[|\]$/g, "")
-    .split(",")
+  const relatedSource = Array.isArray(top.related)
+    ? top.related
+    : `${top.related ?? ""}`.replace(/^\[|\]$/g, "").split(",");
+  const related = relatedSource
     .map((s) => s.trim().replace(/^["']|["']$/g, ""))
     .filter(Boolean);
 
