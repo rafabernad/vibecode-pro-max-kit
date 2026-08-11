@@ -42,15 +42,24 @@ Read the file `.vc-version` in the project root.
 
 ```bash
 # Respect VC_KIT_SOURCE override (local path or alternate URL).
-# When unset, defaults to the official remote.
-KIT_SOURCE="${VC_KIT_SOURCE:-https://github.com/withkynam/vibecode-pro-max-kit.git}"
+# Respect VC_KIT_BRANCH override for the branch/ref to clone.
+# When unset, defaults to this fork's remote and its default branch.
+KIT_SOURCE="${VC_KIT_SOURCE:-https://github.com/rafabernad/vibecode-pro-max-kit.git}"
+KIT_BRANCH="${VC_KIT_BRANCH:-}"
 VC_UPDATE_TMPDIR="/tmp/vc-update-$(date +%s)"
-git clone --local --depth 1 --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR" 2>/dev/null \
-  || git clone --depth 1 --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR"
+if [ -n "$KIT_BRANCH" ]; then
+  git clone --local --depth 1 --branch "$KIT_BRANCH" --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR" 2>/dev/null \
+    || git clone --depth 1 --branch "$KIT_BRANCH" --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR"
+else
+  git clone --local --depth 1 --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR" 2>/dev/null \
+    || git clone --depth 1 --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR"
+fi
 # Note: --local is a no-op for remote URLs (git ignores it); the fallback covers all cases.
 ```
 
-> `VC_KIT_SOURCE` — if set, use this path or URL instead of the official remote. Accepts any value accepted by `git clone`. This enables offline testing (`VC_KIT_SOURCE=/path/to/local/kit`) and forks/pinned versions.
+> `VC_KIT_SOURCE` — if set, use this path or URL instead of the default fork remote. Accepts any value accepted by `git clone`. This enables offline testing (`VC_KIT_SOURCE=/path/to/local/kit`) and alternate forks.
+>
+> `VC_KIT_BRANCH` — if set, clone that branch or ref from `VC_KIT_SOURCE` (or from the default fork remote when `VC_KIT_SOURCE` is unset). Use this to pin `vc-update` to a non-default branch such as `feat/externalize-harness-context`.
 
 If the clone fails (network error, auth error, repo not found):
 - Print the error message.
@@ -415,7 +424,8 @@ Recommended next step — run the five core validators:
 
 ## Rules
 
-- `VC_KIT_SOURCE`: when set, overrides the remote URL for cloning. Used verbatim as the `git clone` source argument. No validation. Enables local testing and forks.
+- `VC_KIT_SOURCE`: when set, overrides the remote URL for cloning. Used verbatim as the `git clone` source argument. No validation. Enables local testing and alternate forks.
+- `VC_KIT_BRANCH`: when set, `vc-update` clones that branch or ref instead of the source remote's default branch. Useful for testing a feature branch of the fork before it lands on the default branch.
 - `process/_seeds/` is a legacy optional scaffold surface. If a remote release still includes it, treat it as managed reference and overwrite it entirely on update. Its absence in the live repo is valid.
 - Real working files outside `_seeds/` are preserved by default. The only allowed `process/` mutations inside vc-update are the safe old-layout migrations described in Step 8 / Step 10 Part D for `process/general-plans/` and `process/features/*/`.
 - Always show the dry-run diff before applying. Never apply without user confirmation.

@@ -131,7 +131,7 @@ A snapshot file written to the user project root after each install/update. Cont
 |-------|------|--------|
 | Network failure during clone | Step 3 | Print error, clean up temp dir, stop |
 | GitHub auth failure | Step 3 | Print "check SSH keys or HTTPS token", clean up, stop |
-| Repo not found (404) | Step 3 | Print "remote repo not found, check URL in SKILL.md", clean up, stop |
+| Repo not found (404) | Step 3 | Print "remote repo not found, check VC_KIT_SOURCE / VC_KIT_BRANCH or the default fork URL in SKILL.md", clean up, stop |
 | Resolver script missing | Step 4 | Fall back to legacy manifest parsing (managed/managedDirs) |
 | Resolver script fails | Step 4 | Print error, suggest checking Node.js version (>= 22), clean up, stop |
 | Malformed vc-manifest.json | Step 4 | Print JSON parse error, clean up, stop |
@@ -142,6 +142,32 @@ A snapshot file written to the user project root after each install/update. Cont
 | Permission denied on delete | Step 10 | Print which file, suggest `chmod`, **continue** |
 | Symlink creation fails | Step 10 | Print error, suggest checking if target exists, **continue** |
 | Declared kit file missing from kit clone | Step 4 | `resolve-manifest` emits a `missingDeclared` list; `compute-sync-plan` prints a loud stderr warning and **preserves** any project copies that would have been deleted — prevents data loss from a partial/corrupt kit clone. Re-clone the kit to resolve. |
+
+## Source Selection
+
+`vc-update` now supports both source override and branch override:
+
+- `VC_KIT_SOURCE`
+  - local checkout path or alternate Git remote URL
+- `VC_KIT_BRANCH`
+  - branch or ref to clone from that source
+
+Examples:
+
+```bash
+# Follow the fork default branch
+VC_KIT_SOURCE=https://github.com/rafabernad/vibecode-pro-max-kit.git
+
+# Follow a feature branch on the fork
+VC_KIT_SOURCE=https://github.com/rafabernad/vibecode-pro-max-kit.git \
+VC_KIT_BRANCH=feat/externalize-harness-context
+
+# Follow a local checkout on a specific branch/ref
+VC_KIT_SOURCE=/Users/rafabernad/Workspace/vibecode-pro-max-kit \
+VC_KIT_BRANCH=feat/externalize-harness-context
+```
+
+If `VC_KIT_BRANCH` is unset, `vc-update` clones the source remote's default branch.
 
 ## Edge Cases
 
