@@ -1,4 +1,18 @@
 {
+  "planning": {
+    "mode": "repo",
+    "repoExecutionContracts": "allowed",
+    "repoBacklog": "compatibility-only"
+  },
+  "tracker": {
+    "mode": "none",
+    "provider": "",
+    "owner": "",
+    "repository": "",
+    "projectNumber": "",
+    "phaseField": "Block",
+    "riperField": "RIPER State"
+  },
   "context": {
     "mode": "repo",
     "external": {

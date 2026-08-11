@@ -24,10 +24,12 @@ Use this folder for durable, repo-specific operating instructions that must stay
 4. `plan-lifecycle.md`
 5. `phase-programs.md`
 6. `context-maintenance.md`
-7. `externalized-context.md`
-8. `communication-standards.md`
-9. `vc-autoresearch-spec.md` (optional deep reference — read only when designing or deeply understanding the autoresearch gap-loop primitive)
-10. `autopilot.md` — Autopilot Mode trigger phrases, consolidated clarification, provisional goal block format, mode markers, per-gate decision policy, hard stops, and deactivation rules. Read when: user says autopilot / autonomous mode / /autopilot trigger phrases, or when understanding orchestrator §Autonomy Mode integration.
+7. `artifact-placement.md`
+8. `tracker-native-planning.md`
+9. `externalized-context.md`
+10. `communication-standards.md`
+11. `vc-autoresearch-spec.md` (optional deep reference — read only when designing or deeply understanding the autoresearch gap-loop primitive)
+12. `autopilot.md` — Autopilot Mode trigger phrases, consolidated clarification, provisional goal block format, mode markers, per-gate decision policy, hard stops, and deactivation rules. Read when: user says autopilot / autonomous mode / /autopilot trigger phrases, or when understanding orchestrator §Autonomy Mode integration.
 
 ## File Roles
 
@@ -47,6 +49,12 @@ Use this folder for durable, repo-specific operating instructions that must stay
   How to run large multi-phase programs: umbrella plan, per-phase plan split, required 10-step loop, blocker handling, and foundation-vs-expansion boundaries.
 - `context-maintenance.md`
   How `process/context/` is organized, when to create or split groups, how to keep `all-context.md` accurate, and how long-lived knowledge differs from feature plans.
+- `artifact-placement.md`
+  What belongs in the repository, what belongs in an external tracker, and what AI-generated
+  process artifacts should not be persisted at all.
+- `tracker-native-planning.md`
+  How to keep the tracker as the source of truth for active work management while preserving only
+  minimal execution-oriented repo artifacts when needed.
 - `externalized-context.md`
   How to keep durable project context outside the product repo while preserving the existing local
   `process/context/` contract for agents through a sync step.

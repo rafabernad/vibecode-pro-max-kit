@@ -35,6 +35,8 @@ Read these files as needed:
 - [plan-lifecycle.md](process/development-protocols/plan-lifecycle.md)
 - [phase-programs.md](process/development-protocols/phase-programs.md)
 - [context-maintenance.md](process/development-protocols/context-maintenance.md)
+- [artifact-placement.md](process/development-protocols/artifact-placement.md)
+- [tracker-native-planning.md](process/development-protocols/tracker-native-planning.md)
 - [externalized-context.md](process/development-protocols/externalized-context.md)
 - [autopilot.md](process/development-protocols/autopilot.md)
 - [communication-standards.md](process/development-protocols/communication-standards.md)
@@ -95,6 +97,10 @@ Before substantial planning or implementation work, consult:
 **Context routing discipline:** `all-*.md` entrypoints are routers, not the full knowledge. Agents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
 
 **Thin-repo compatibility:** A repository may externalize its durable context while preserving the same local path contract. If `/.vc-project.json` sets `context.mode` to `external`, sync the configured external context before substantial work with `node scripts/vc-sync-external-context.mjs`, then treat the hydrated local `process/context/` tree as authoritative for the current session.
+
+**Artifact-placement rule:** Do not default to storing backlog, plan tracking, phase status, or other work-management outputs in the repo. Use `process/development-protocols/artifact-placement.md` to decide whether an artifact belongs in the repository, in an external tracker, or should not be persisted at all.
+
+**Tracker-native rule:** If `/.vc-project.json` sets `planning.mode` to `tracker-native`, treat the external tracker as the source of truth for active work management. RIPER runs inside tracker-defined work blocks; repo-local plan artifacts are exceptions, not the default. See `process/development-protocols/tracker-native-planning.md`.
 
 ### Core Protocol
 

@@ -14,6 +14,14 @@ metadata:
 
 ## Canonical Plan Surface
 
+Read `artifact-placement.md` before creating a new repo-resident plan artifact. The repository is
+not the default home for backlog, progress tracking, or large AI-generated work-management
+documents.
+
+If `/.vc-project.json` sets `planning.mode` to `tracker-native`, the external tracker is the
+default home for active work decomposition and progress. In that mode, repo-local plans are narrow
+execution contracts or migration bridges only. See `tracker-native-planning.md`.
+
 Default active-plan locations:
 
 - `process/general-plans/active/`
@@ -201,11 +209,17 @@ Migration expectation:
 
 ## Backlog
 
+Backlog is a compatibility surface in this repo, not the preferred steady-state home for active
+product work management. See `artifact-placement.md`.
+
 - Cross-cutting deferred work belongs in `process/general-plans/backlog/`.
 - Feature-specific deferred work belongs in `process/features/{feature}/backlog/`.
 - Use backlog for actionable follow-up work, not finished reports or durable reference material.
 - Use references for research outputs that inform future decisions.
 - Move an item from `active/` to backlog when it is intentionally deferred but still actionable.
+
+For new systems or repos being cleaned up, prefer an external tracker for backlog instead of adding
+new repo backlog artifacts.
 
 ## Archiving
 

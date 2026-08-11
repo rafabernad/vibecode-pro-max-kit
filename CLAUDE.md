@@ -42,6 +42,8 @@ Reference docs (harness methodology, not project-specific):
 - `.agents/skills/vc-generate-plan/references/example-simple-prd.md` - Reference for simple plan structure
 - `.agents/skills/vc-generate-plan/references/example-complex-prd.md` - Reference for complex plan depth
 - `.agents/skills/vc-generate-phase-program/references/program-goal-charter-template.md` - Program Goal Charter template for phase programs
+- `process/development-protocols/artifact-placement.md` - Policy for what belongs in the repo, in external tracking, or not persisted at all
+- `process/development-protocols/tracker-native-planning.md` - Contract for tracker-native work management with minimal repo-local execution artifacts
 - `process/development-protocols/externalized-context.md` - Thin-repo protocol for keeping durable context in a separate Git repository
 
 ### Orchestrator Role (Main Claude Code Session)
@@ -166,6 +168,10 @@ plus `process/development-protocols/all-development-protocols.md`.
 **Context routing discipline:** `all-*.md` entrypoints are routers, not the full knowledge. Agents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
 
 **Thin-repo compatibility:** A repository may keep its durable context outside the product repo. If `/.vc-project.json` sets `context.mode` to `external`, run `node scripts/vc-sync-external-context.mjs` before substantial work, then use the hydrated local `process/context/` tree as the authoritative session context.
+
+**Artifact-placement rule:** Do not treat the repo as the default home for backlog, plan tracking, phase status, or other work-management artifacts. Use `process/development-protocols/artifact-placement.md` to decide whether an artifact belongs in the repository, in external tracking, or should not be persisted at all.
+
+**Tracker-native rule:** If `/.vc-project.json` sets `planning.mode` to `tracker-native`, treat the external tracker as the source of truth for active work management. RIPER runs inside tracker-defined work blocks; repo-local plan artifacts are exceptions, not the default. See `process/development-protocols/tracker-native-planning.md`.
 
 ---
 
