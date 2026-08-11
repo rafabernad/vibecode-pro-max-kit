@@ -141,7 +141,7 @@ Auto-Detection Patterns:
 - UI/frontend -> surface vc-frontend-design skill plus vc-research-agent
 - Refactor/simplify -> vc-code-simplifier for pure style or RESEARCH -> PLAN -> EXECUTE for behavioral refactors
 - Missing context -> suggest the `vc-generate-context` skill
-- Existing plan file -> scan `process/general-plans/active/` and `process/features/*/active/`, confirm with user, resume from last phase
+- Existing repo-local plan file -> only if `planning.mode` is NOT `tracker-native`, or if the repo-local plan is an explicit compatibility bridge / execution contract; otherwise prefer the external tracker as the resume source of truth
 
 Large program rule:
 
@@ -204,6 +204,9 @@ Codex and Claude share the `process/` directory:
 
 ### `process/general-plans/`
 
+In `tracker-native` projects, this is a compatibility surface, not the preferred source of truth
+for active work management.
+
 Default new feature plans use date-stamped naming: `[feature]_PLAN_[dd-mm-yy].md`
 
 - Plans are system-agnostic and work across tools
@@ -241,7 +244,7 @@ Feature-scoped storage for large feature clusters. Each feature folder contains:
 
 - `active/` - In-progress plans
 - `completed/` - Archived completed plans
-- `backlog/` - Deferred/future plans
+- `backlog/` - Deferred/future plans (compatibility surface; prefer external tracker in `tracker-native` mode)
 
 Task-folder convention:
 - Reports, references, specs, and plans live inside the task folder under `active/` or `completed/`
@@ -269,7 +272,7 @@ At plan creation time, use this decision logic:
 | Topic clearly belongs to an existing feature | Use that feature's folder |
 | New multi-phase project with 3+ planned phases | Create feature folder upfront |
 | User says "this is a big feature" or names a product area | Create feature folder upfront |
-| Single plan, no backlog, unclear scope | Use `process/general-plans/active/` |
+| Single plan, no backlog, unclear scope | Use `process/general-plans/active/` only when `planning.mode` is not `tracker-native`; otherwise prefer external tracker + minimal repo execution contract if needed |
 | Cross-cutting work touching multiple features | Use general folders |
 
 Promotion protocol from general to feature folder:
@@ -537,7 +540,7 @@ Debug / Root Cause (keywords: "debug", "why", "root cause", "investigate")
 
 When multiple intents match, use this precedence:
 
-1. Existing plan file in `process/general-plans/active/` or `process/features/*/active/` -> always resume first
+1. Existing repo-local plan file in `process/general-plans/active/` or `process/features/*/active/` -> resume first only when `planning.mode` is not `tracker-native`, or when that file is the explicit compatibility bridge / execution contract selected for the work
 2. Explicit mode command (`ENTER X MODE`) -> obey immediately
 3. Bug/debug -> debugging routing before feature routing
 4. Feature request -> RIPER-5 flow
@@ -553,7 +556,7 @@ Before routing to subagent, pass relevant `process/context/` files:
 - `process/context/all-context.md` - always pass or consult first for context routing
 - `process/context/all-context.md` - always pass for architecture/stack awareness
 - `process/context/tests/all-tests.md` - pass when routing to `vc-tester`, `vc-debugger`, or `vc-execute-agent`
-- `process/general-plans/active/` and `process/features/*/active/` - check for existing plans to avoid duplication
+- `process/general-plans/active/` and `process/features/*/active/` - check for existing repo-local execution contracts or compatibility-bridge plans when relevant; do not treat their absence as a blocker in `tracker-native` mode
 - Relevant code paths - summarize succinctly, don't dump entire files
 
 **Routing depth rule:** `all-*.md` files are routers. After reading the router, subagents MUST follow its routing table to load the deeper file(s) relevant to their task before proposing or executing operational steps.

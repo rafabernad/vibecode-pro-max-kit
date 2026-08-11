@@ -39,11 +39,15 @@ The manual scan in **Scope Rules** below is the FALLBACK for when the script fai
 
 Surface all plans relevant to the current task so agents have full plan context — what was tried, what is in progress, what is deferred, and what reports and references exist — before doing any phase work.
 
+If `/.vc-project.json` sets `planning.mode` to `tracker-native`, this skill is for compatibility
+bridges and repo-local execution contracts only. It must not be treated as the default source of
+truth for active work decomposition or backlog.
+
 ## Scope Rules
 
 - **Same feature folder** (from task context or argument): read ALL of `active/`, `backlog/`, `completed/`, plus any legacy sibling `reports/`, `references/` — surface every file with frontmatter
 - **Other feature folders**: read `active/` only — surface plans whose frontmatter `description` or `feature` field matches the task domain
-- **`general-plans/active/`**: always scan
+- **`general-plans/active/`**: always scan in repository-centric mode; in `tracker-native` mode scan only when a repo-local execution contract / compatibility bridge is expected
 - **`general-plans/completed/`, legacy `reports/`, `references/`**: scan only when same-feature folder is not identified
 
 Per **task-folder artefact colocation**, expect every current artefact (plan, spec, reports, references) INSIDE its `{slug}_{date}/` task folder — scan one level into each task folder. The sibling `reports/`/`references/` dirs are deprecated and only hold legacy artefacts.
@@ -60,7 +64,7 @@ Output: grouped list by folder — Active Plans / Backlog / Completed / Reports 
 
 ## When To Invoke
 
-- First action alongside `vc-context-discovery` at the start of every loop step (research / validate / execute / update-process)
+- First action alongside `vc-context-discovery` at the start of every loop step (research / validate / execute / update-process) only when repo-local plan artifacts are part of the workflow for this project or task
 - Any time an agent needs to know: what plans exist for this feature, what was tried before, what is deferred, what references exist
 
 ## Output Format

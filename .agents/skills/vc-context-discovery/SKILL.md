@@ -15,6 +15,8 @@ metadata:
 
 Discover and load all relevant context for the current task. This skill lists feature group nested files with full paths and loads `process/context/` files by domain routing table. It is the canonical context-loading entrypoint for every agent session.
 
+If `/.vc-project.json` sets `planning.mode` to `tracker-native`, repo-local plan surfaces are compatibility hints only, not the default operational source of truth.
+
 ## When To Invoke
 
 At the start of every agent session (research, innovate, plan, validate, execute, update-process, fast-mode). Also at the start of any skill that needs repo context before operating.
@@ -66,7 +68,7 @@ metadata:
 ## Invocation
 
 **Primary method** — run the auto-discovery script. It lists all nested files under
-`process/context/`, `process/development-protocols/`, `process/general-plans/active/`,
+`process/context/`, `process/development-protocols/`, and when relevant `process/general-plans/active/`,
 and (with `--feature`) the feature folder, extracting ONLY the leading YAML frontmatter
 block of each `.md` file (no whole-file reads):
 
@@ -75,7 +77,7 @@ node .agents/skills/vc-context-discovery/scripts/discover-context.mjs [--feature
 ```
 
 The script groups output into: context files with frontmatter, protocol files, feature
-files by subfolder, active general plans, and files-without-frontmatter (path only). It
+files by subfolder, optional repo-local active plans, and files-without-frontmatter (path only). It
 never throws on a missing root and exits 0 unless given a bad flag. Use `--json` for a
 machine-readable object. Prefer this over manually reading each file — it is deterministic
 and avoids loading huge files into context.
@@ -119,7 +121,10 @@ Use these steps only if the script above fails or is unavailable.
 
 **Step 4.** If a feature name was provided as the argument, run `find process/features/{feature}/ -type f | sort` to list ALL artifacts across all subfolders (`active/`, `completed/`, `backlog/`, plus any legacy `reports/`, `references/`). Surface full file paths — not just folder names. Per **task-folder artefact colocation**, expect each task's plan, spec, reports, and references INSIDE its own `{slug}_{date}/` task folder; the sibling `reports/`/`references/` dirs are deprecated and only hold legacy artefacts.
 
-**Step 5.** If no feature name was provided, run `find process/general-plans/active/ -type f | sort` to surface any active plans relevant to the current task. Note: plan files are inside `{slug}_{date}/` task subfolders — look one level deep for `*_PLAN_*.md` files.
+**Step 5.** If no feature name was provided, run `find process/general-plans/active/ -type f | sort` only when repo-local plans are relevant to the task:
+- always in repository-centric mode
+- in `tracker-native` mode only when a repo-local execution contract or compatibility-bridge plan is explicitly known or suspected
+Do not treat the absence of repo-local plans as a context gap in `tracker-native` mode.
 
 **Step 6.** From the routing table in `all-context.md`, identify the context group files relevant to the current task domain (e.g. `tests`, `container`, `infra`, `skills`, `uxui`, `workflows`). Do NOT read every context file — only the ones the routing table says apply to this domain. If no row obviously matches, run `discover-context.mjs --match "<task>"` and use its ranked keyword hits instead of guessing.
 
@@ -160,7 +165,7 @@ inner-loop agents:
 | 5 | `worktree` | worktree path (or `main`) |
 | 6 | `context-group` | relevant `process/context/` group (or `none`) |
 | 7 | `blast-radius-packages` | packages/paths in scope (comma-separated or `TBD`) |
-| 8 | `active-plan` | selected plan file path (or `none`) |
+| 8 | `active-plan` | selected repo-local execution contract / plan path (or `none`) |
 | 9 | `test-runner` | test runner(s); multi-runner uses pipe-delimited DISPLAY format `bun test \| vitest` |
 | 10 | `validate-contract` | validate-contract path (or `none`) |
 
@@ -181,11 +186,12 @@ Surface the following fields alongside path: `name`, `description`, `keywords`, 
 
 Use the `description` and `keywords` fields for routing decisions instead of filename inference.
 
-Group plan files by their `feature` field value.
+Group repo-local plan files by their `feature` field value.
 
 Filter and sort by `type` field (`context` / `plan` / `report` / `references`).
 
 Discover all nested files under feature group subdirs: `active/`, `completed/`, `backlog/`, `reports/`, `references/`.
+In `tracker-native` mode, treat these as compatibility surfaces unless the task explicitly depends on a repo-local execution contract.
 
 Files without frontmatter: surface path only (no error), do not skip them.
 

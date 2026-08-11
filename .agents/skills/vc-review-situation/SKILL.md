@@ -16,6 +16,9 @@ metadata:
 
 Summarize the current repo state for handoff and resume work.
 
+If `/.vc-project.json` sets `planning.mode` to `tracker-native`, treat repo-local plans as
+compatibility hints only unless the project explicitly uses a repo-local execution contract.
+
 This is a helper skill only.
 
 - Do use it for read-only branch, worktree, and active-plan summaries.
@@ -65,7 +68,7 @@ Run the scan **plus** read umbrella plan, latest phase report, and all active-pl
 
 `vc-review-situation` is advisory.
 
-- Evidence comes from git, worktree metadata, and `process/*` plan inventory.
+- Evidence comes from git, worktree metadata, and optional `process/*` plan inventory.
 - Selected-plan awareness is a hint, not a command.
 - Next-step recommendations are suggestions, not workflow gates.
 
@@ -96,11 +99,12 @@ The scanner reads from:
 - `git status --short --branch`
 - `git worktree list --porcelain`
 - local and remote branch refs plus sampled recent commits
-- `process/general-plans/active/` (plans inside `{slug}_{date}/` task subfolders — scan one level deep)
+- `process/general-plans/active/` (plans inside `{slug}_{date}/` task subfolders — scan one level deep; compatibility surface in `tracker-native` mode unless a repo-local execution contract is in use)
 - `process/features/*/active/` (same depth)
 - optional session-state hints if a local session id is present
 
 It does not scan upstream `plans/**`, and it never treats a selected-plan hint as execute authority.
+In `tracker-native` mode, absence of repo-local active plans is normal and must not be surfaced as a workflow defect by itself.
 
 ## Output Shape
 
