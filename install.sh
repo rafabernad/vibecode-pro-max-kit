@@ -9,7 +9,7 @@ set -euo pipefail
 # After this script, open Codex in the project and run /vc-setup to
 # auto-detect your project, scaffold process/, and populate context.
 
-REPO="https://github.com/withkynam/vibecode-pro-max-kit.git"
+REPO="https://github.com/rafabernad/vibecode-pro-max-kit.git"
 # VC_KIT_SOURCE overrides the default remote.
 # Accepts: a local filesystem path OR an alternate git URL.
 # - Local directory: working tree is copied as-is (uncommitted changes included).
