@@ -37,6 +37,10 @@ Create exhaustive technical specification with zero ambiguity. The plan must be 
 
 You are locking architecture before code is written. Think in systems: data flow, dependencies, failure modes, test coverage, migration impact, and rollback safety.
 
+If `/.vc-project.json` sets `planning.mode` to `tracker-native`, the external tracker is the default
+source of truth for active work decomposition and status. Repo-local plan files are exceptions only:
+compact execution contracts or compatibility-bridge artifacts when the tracker alone is insufficient.
+
 For large multi-phase programs, planning does not end at one artifact. You may need:
 
 - one umbrella/orchestration plan
@@ -76,7 +80,7 @@ Under /goal autonomous execution: emit a 1-sentence restatement as an audit log 
 - When planning touches verification strategy, test routing, or runtime evidence expectations, also read `process/context/tests/all-tests.md` before selecting deeper test docs.
 - Load feature folder file listing when `Feature:` is present: `find process/features/{feature}/ -type f | sort`
 
-**invoke `vc-plan-discovery`:** Load related plans for the current task alongside `vc-context-discovery`. Pass the feature name (if provided) or task domain. Covers same-feature plans at full depth (active/backlog/completed/reports/refs) and other-feature active plans plus general-plans active, both via frontmatter.
+**invoke `vc-plan-discovery`:** Load related repo-local plans for the current task alongside `vc-context-discovery` only when repo-local plan artifacts are part of the workflow for this project or task. In `tracker-native` mode, use it for compatibility bridges and execution contracts only, not as the default source of operational truth.
 
 **Context Envelope (canonical C-2 order):** At session start, populate the 10-field Context Envelope
 in the EXACT canonical order documented in `.claude/skills/vc-context-discovery/SKILL.md`
@@ -86,7 +90,7 @@ for this agent; the `test-runner` multi-runner value uses the pipe-delimited DIS
 (`bun test | vitest`) that the phase-loop workflow template expands into SEQUENTIAL steps.
 
 **Action 2 — vc-review-situation**: Invoke `vc-review-situation` for branch/worktree/active-plan status handoff summary.
-- Confirm the current branch, any in-progress plans, and worktree state before beginning plan work.
+- Confirm the current branch, any in-progress repo-local execution contracts/plans when relevant, and worktree state before beginning plan work.
 
 **Step 3 — invoke `vc-agent-strategy-compare` (Tier 0):**
 Confirm execution strategy for this PLAN session before writing any files.
@@ -95,14 +99,14 @@ Confirm execution strategy for this PLAN session before writing any files.
 
 When the orchestrator passes `Work context`, `Feature`, `Reports`, or `Plans`, treat those as authoritative scope hints. If `Feature:` is present, prefer the matching `process/features/{feature}/active/` and `reports/` surfaces unless repo truth proves the work is cross-cutting. When `Feature:` is set, also run `find process/features/{feature}/ -type f | sort` as preflight to see ALL artifacts across active, completed, backlog, references, and reports before creating or updating any plan.
 
-If `Feature:` is NOT set but the task description references a named topic, scan `process/features/` directory names for a candidate match. If a candidate folder is found, surface it to the orchestrator ("This looks like it belongs to feature: {candidate} — should I use that folder?") before defaulting to `process/general-plans/active/`. Only default to general-plans when no candidate is found.
+If `Feature:` is NOT set but the task description references a named topic, scan `process/features/` directory names for a candidate match. If a candidate folder is found, surface it to the orchestrator ("This looks like it belongs to feature: {candidate} — should I use that folder?") before defaulting to `process/general-plans/active/`. Only default to general-plans when no candidate is found, and in `tracker-native` mode prefer tracker-native decomposition plus a minimal repo-local execution contract if needed.
 
 ## Permitted Activities
 
 - Reading files for context
 - Creating detailed implementation plans
-- Writing to `process/general-plans/active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md` (default — task-folder convention)
-- Writing to `process/features/{feature}/active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md` (when Feature context is specified)
+- Writing to `process/general-plans/active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md` (default only in repository-centric mode, or as a compatibility bridge / minimal execution contract in `tracker-native` mode)
+- Writing to `process/features/{feature}/active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md` (when Feature context is specified; same `tracker-native` exception rule)
 - Generating implementation checklists
 - Running `date +%d-%m-%y` to get current date for filename
 - Creating todos in Cursor Plan mode format
@@ -124,6 +128,8 @@ If `Feature:` is NOT set but the task description references a named topic, scan
 After user confirms plan content, you MAY create or update:
 - `process/general-plans/active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md` (default — task-folder convention; create the `{slug}_{dd-mm-yy}/` subfolder first)
 - `process/features/{feature}/active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md` (when Feature is specified in context)
+
+In `tracker-native` mode, use this exception only when the repo-local artifact is a justified execution contract or compatibility bridge. It must not become a second source of truth for backlog, sequencing, or status.
 
 This is the ONLY exception to the no-modification rule in PLAN mode. No other files may be created or modified.
 
@@ -153,7 +159,7 @@ For large programs, also apply `process/development-protocols/phase-programs.md`
 
 ### Step 1: Check for Existing Plan
 
-Look for plans in the correct active-plan surface before creating anything:
+Look for repo-local plans in the correct active-plan surface before creating anything, but in `tracker-native` mode treat them as optional compatibility artifacts rather than required workflow anchors:
 
 - `process/general-plans/active/`
 - `process/features/*/active/`
@@ -165,7 +171,7 @@ Treat the active inventory as intentionally mixed during scans and resume flows:
 - legacy `plan.md`
 - legacy `phase-*.md` siblings or plan folders
 
-If overlapping active plans exist, update or resume them instead of duplicating work.
+If overlapping repo-local active plans exist, update or resume them instead of duplicating work. In `tracker-native` mode, if no repo-local plan exists, continue with tracker-native decomposition rather than treating that absence as a blocker.
 
 ### Step 2: Update Existing Plan (if found)
 
@@ -189,7 +195,7 @@ date +%d-%m-%y
 
 **Classify complexity** (3-way):
 - Ask user: "Is this SIMPLE, COMPLEX, or a PHASE PROGRAM?"
-- **SIMPLE**: One-session feature, 8-15 steps, single plan artifact.
+- **SIMPLE**: One-session feature, 8-15 steps, single plan artifact or tracker-native decomposition with minimal repo execution contract.
 - **COMPLEX**: Multi-phase project within one plan, requires RFC-style depth but not split phase plans.
 - **PHASE PROGRAM**: 3+ dependent phases, each needing its own validation gate / spanning many packages or surfaces, or the user wants repeated research/execute/validate loops → produces an umbrella plan + per-phase stubs via `vc-generate-phase-program` (see Large Program Detection below).
 
@@ -219,7 +225,7 @@ When 3+ phase plans need to be created (phase program detected), invoke `vc-agen
 
 Do this recommendation-first:
 
-- first recommend whether the task should stay a normal complex plan or become a phase program
+- first recommend whether the task should stay a normal complex plan / tracker-native tranche or become a phase program
 - recommend the feature folder when relevant
 - recommend the umbrella plan shape, phase sequence, and immediate next action
 - stop for approval before creating the program artifacts (unless under /goal autonomous execution — see Autonomous /goal Execution Rules below)

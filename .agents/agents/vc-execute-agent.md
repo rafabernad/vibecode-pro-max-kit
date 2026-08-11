@@ -48,7 +48,7 @@ Restate scope of what is being executed — the selected plan file path and phas
 
 **[E-S1] vc-context-discovery** — load active plan context files and feature folder artifacts. Invoke `vc-context-discovery`: load the relevant context group files from `process/context/all-context.md` routing table, plus test context via the `process/context/tests/all-tests.md` routing chain. Do not skip — context group files contain the current state of implementation and key patterns that override stale training knowledge.
 
-**[E-S2] vc-plan-discovery** — find related plans via frontmatter (same feature full depth, other features active-only, general-plans active). Pass the feature name (if provided) or task domain. Covers same-feature plans at full depth (active/backlog/completed/reports/refs) and other-feature active plans plus general-plans active, both via frontmatter.
+**[E-S2] vc-plan-discovery** — only when repo-local execution contracts are part of the workflow, find related plans via frontmatter (same feature full depth, other features active-only, general-plans active). Pass the feature name (if provided) or task domain. In tracker-native mode, skip this step unless a repo-local execution contract / compatibility bridge is known or expected.
 
 **Context Envelope (canonical C-2 order):** At session start, populate the 10-field Context Envelope in the EXACT canonical order documented in `.claude/skills/vc-context-discovery/SKILL.md` §Context Envelope: `feature → phase → session-goal → branch → worktree → context-group → blast-radius-packages → active-plan → test-runner → validate-contract`. The `phase` field is `EXECUTE` for this agent. The `test-runner` multi-runner value uses the pipe-delimited DISPLAY format (`bun test | vitest`) that the phase-loop workflow template expands into SEQUENTIAL test steps — never run a literal `bun test | vitest` shell pipe.
 
@@ -66,7 +66,7 @@ Restate scope of what is being executed — the selected plan file path and phas
 
 **[E-S4] vc-agent-strategy-compare** — confirm execution strategy for this EXECUTE session. Present the full 4-option suite (sequential / parallel / workflow / vc-team) with cost estimates before beginning implementation.
 
-**[E-S5] read and confirm plan** — load the selected plan file fully; verify plan is the one the orchestrator specified; if no plan passed → halt with NEEDS_CONTEXT.
+**[E-S5] read and confirm execution contract** — load the selected repo-local plan file fully when one exists, or confirm the tracker/external execution contract the orchestrator specified; if neither a repo-local plan nor a concrete external execution contract reference was passed → halt with NEEDS_CONTEXT.
 
 Note: Step 0=[E-S0], Context Loading=[E-S1]+[E-S2], Situation Review=[E-S3], Strategy=[E-S4], Plan Read=[E-S5]
 
@@ -74,15 +74,15 @@ Note: Step 0=[E-S0], Context Loading=[E-S1]+[E-S2], Situation Review=[E-S3], Str
 
 At session start, before any implementation:
 
-1. Require one explicit selected plan file path from the orchestrator or user
-2. Read that exact plan file and confirm the phase/task to implement
-3. If no exact plan file path was provided → **STOP**. Do not proceed. Tell the user:
-   "No explicit plan file path was provided. Please select one approved plan file (or say 'ENTER PLAN MODE' to create/update it) before EXECUTE continues."
+1. Require one explicit execution contract reference from the orchestrator or user: exact repo-local plan file path when one exists, otherwise the tracker/external execution contract reference used for this run
+2. Read that exact repo-local plan file and confirm the phase/task to implement when a repo-local file exists; otherwise confirm the external execution contract details from the handoff before touching code
+3. If neither an exact repo-local plan path nor a concrete external execution contract reference was provided → **STOP**. Do not proceed. Tell the user:
+   "No explicit execution contract was provided. Please select one approved repo-local plan file or tracker/external work block (or say 'ENTER PLAN MODE' to create/update it) before EXECUTE continues."
 4. If the provided path is a legacy multi-file plan shape, use the selected primary plan file as the anchor and read any additional supporting phase files explicitly passed in the handoff
 5. For direct `*_PLAN_*.md` artifacts, inspect the plan's `Touchpoints`, `Public Contracts`, `Blast Radius`, `Verification Evidence`, and `Resume and Execution Handoff` sections before touching code. If a needed section is missing on a newly generated/touched direct plan, stop and return to PLAN rather than guessing.
 6. If the plan contains a `## Validate Contract` section, read it before touching code. Use its `Test gates:` entries as the authoritative list of what to run and which tier each belongs to (automated / hybrid / agent-probe / known-gap). These override generic test commands from `tests/all-tests.md` for areas named in the contract. Before running any test gate, load the test gate matrix from the validate-contract's `vc-test-coverage-plan` section and run the exact commands specified there — do not invent test commands.
 
-**Exception**: Trivial fixes (single-file, under 15 lines, no schema/auth changes) may proceed without a plan file.
+**Exception**: Trivial fixes (single-file, under 15 lines, no schema/auth changes) may proceed without a repo-local plan file.
 
 ## Context Loading
 
@@ -90,13 +90,13 @@ At session start, before any implementation:
 
 Before any phase work, invoke `vc-context-discovery`: load the relevant context group files from `process/context/all-context.md` routing table, plus test context via the `process/context/tests/all-tests.md` routing chain. Do not skip this step — context group files contain the current state of implementation and key patterns that override stale training knowledge.
 
-**invoke `vc-plan-discovery`:** Load related plans for the current task alongside `vc-context-discovery`. Pass the feature name (if provided) or task domain. Covers same-feature plans at full depth (active/backlog/completed/reports/refs) and other-feature active plans plus general-plans active, both via frontmatter.
+**invoke `vc-plan-discovery`:** Load related plans for the current task alongside `vc-context-discovery` only when repo-local plan artifacts are relevant. Pass the feature name (if provided) or task domain. In tracker-native mode, absence of repo-local plan artifacts is normal and must not block EXECUTE.
 
 Before implementation, read `process/context/all-context.md` first to choose the smallest relevant context docs. Then load the routed domain-specific files or groups required by the approved plan.
 
 When verification, runtime evidence, browser flows, or test selection matter, read `process/context/tests/all-tests.md` before deeper testing docs.
 
-When the orchestrator passes `Work context`, `Feature`, `Reports`, or `Plans`, treat those as authoritative handoff hints. If `Feature:` is present, use the matching `process/features/{feature}/active/{slug}_{date}/` task folder for plan-following and evidence capture. Sibling `process/features/{feature}/reports/` is a legacy read-only path — new artifacts go inside task folders.
+When the orchestrator passes `Work context`, `Feature`, `Reports`, or `Plans`, treat those as authoritative handoff hints. If `Feature:` is present, use the matching `process/features/{feature}/active/{slug}_{date}/` task folder for repo-local plan-following and evidence capture when that task folder exists. In tracker-native mode, use repo-local task folders only for explicit execution contracts or technical evidence, not as a shadow planning system. Sibling `process/features/{feature}/reports/` is a legacy read-only path — new artifacts go inside task folders.
 
 ## Permitted Activities
 

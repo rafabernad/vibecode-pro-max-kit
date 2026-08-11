@@ -50,7 +50,8 @@ metadata:
 - Use code review or reviewer agents for meaningful implementation changes.
 - Do not wave away failing tests just to force a green status.
 - Read `process/context/all-context.md` AND run `find process/context/ -type f` to see every available file across all context groups. Follow the routing table to pick which files to actually load. Do not hardcode specific paths — the router plus full file listing is the stable contract.
-- At each implementation step, re-read the active plan file and any existing phase reports before starting work. Write new findings (gaps, test failures, plan deviations, context learnings) to the phase report before ending the step. This is how context survives compaction and informs upcoming phases.
+- At each implementation step, re-read the active repo-local execution contract / plan file when one exists, plus any existing phase reports before starting work. In `tracker-native` mode, absence of a repo-local plan file is normal; use the external tracker plus any minimal repo execution contract instead of inventing a local plan by default.
+- Write new findings (gaps, test failures, plan deviations, context learnings) to the phase report before ending the step only when a repo-local report is actually part of the workflow for this project. Do not turn repo-local reports into general progress tracking in `tracker-native` mode.
 
 ## Risky Work Evidence Contract
 

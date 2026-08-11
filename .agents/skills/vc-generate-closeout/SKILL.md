@@ -15,16 +15,20 @@ metadata:
 
 Generate the post-EXECUTE closeout packet for a completed plan or phase. Produces a structured summary with archive-readiness classification, drift signal scoring, commit checkpoint recommendation, and the single best next valid state.
 
+If `/.vc-project.json` sets `planning.mode` to `tracker-native`, treat repo-local plans and reports as
+optional execution artifacts only. Closeout must not assume that local plan inventory is the source
+of truth for backlog or overall program status.
+
 ## When To Invoke
 
 Invoke this skill at the end of:
 
 - Any non-trivial EXECUTE completion (the execute-agent's own closeout block)
-- ENTER UPDATE PROCESS MODE flows before archiving a plan
+- ENTER UPDATE PROCESS MODE flows before archiving a repo-local execution contract / plan when one exists
 - fast-mode-agent session end, after implementation and verification are complete
 - Phase program closeout between phases (after validate + regression checkpoint, before inter-phase UPDATE PROCESS)
 
-Do not invoke for trivial single-file fixes where the plan file is not involved.
+Do not invoke for trivial single-file fixes where no repo-local execution artifact is involved.
 
 ## Mode Selection
 
@@ -70,7 +74,7 @@ When in doubt, prefer Deep Mode. A false-confident Simple closeout is worse than
 Every closeout packet must include these 9 items. Present them in order.
 
 1. **Selected plan path**
-   - The exact file path of the plan being closed out (e.g. `process/features/foo/active/foo-phase-01_PLAN_03-06-26.md`). Never leave this implicit.
+   - The exact file path of the repo-local plan / execution contract being closed out when one exists (e.g. `process/features/foo/active/foo-phase-01_PLAN_03-06-26.md`). In `tracker-native` mode, use `none` only when no repo-local execution artifact was required.
 
 2. **Closeout classification** (one of three states — see §Closeout Classification States)
 
@@ -112,7 +116,7 @@ Every closeout packet must include these 9 items. Present them in order.
 Exactly three states are allowed. Choose one and state it verbatim.
 
 - **Ready for UPDATE PROCESS archival**
-  - The selected plan path still matches the implemented work.
+- The selected repo-local plan path still matches the implemented work.
   - Required verification evidence exists.
   - No material deviations remain unresolved.
   - The user has confirmed or approved cleanup.
@@ -124,7 +128,7 @@ Exactly three states are allowed. Choose one and state it verbatim.
   - Do not archive until those are resolved.
 
 - **Needs PLAN/UPDATE PROCESS reconciliation**
-  - Material deviations from the selected plan were required during execution.
+- Material deviations from the selected repo-local plan were required during execution.
   - Context or process updates are needed before the plan can be archived.
   - The work should route through UPDATE PROCESS or back to PLAN first.
 
@@ -180,7 +184,7 @@ Do not treat every successful code change as immediately archive-ready.
 Use these three states (see also §Closeout Classification States for the exact criteria):
 
 - **Ready to archive**
-  - The selected plan path still matches the implemented work.
+- The selected repo-local plan path still matches the implemented work.
   - Required verification evidence exists.
   - No material deviations remain unresolved.
   - The user has confirmed or approved cleanup.
@@ -190,7 +194,7 @@ Use these three states (see also §Closeout Classification States for the exact 
   - Implementation is substantially complete but testing, manual verification, or explicit user confirmation is still pending.
 
 - **Needs reconciliation before archival**
-  - Material deviations from the selected plan were required.
+- Material deviations from the selected repo-local plan were required.
   - Context/process updates are needed before the plan can be archived.
   - The work should route through UPDATE PROCESS or back to PLAN first.
 
@@ -240,6 +244,7 @@ When both execution and process changes are present, always recommend the execut
 Present the closeout packet as a structured Markdown block with each numbered item as a heading or bold label. End with the drift signal score and required threshold phrase, and the single best next valid state as a clear final recommendation.
 
 Per **task-folder artefact colocation**, when the closeout packet is persisted as a file, write it INTO the plan's own task folder (`process/features/{feature}/active/{slug}_{date}/` or `process/general-plans/active/{slug}_{date}/`) as `{slug}_REPORT_{date}.md` — never into a sibling `reports/` dir or any ad-hoc location. On completion the whole folder moves as a unit.
+In `tracker-native` mode, persist a repo-local closeout file only when a repo-local execution contract existed or when the closeout itself is needed as technical evidence. Do not use repo-local closeout files as general progress tracking.
 
 Example shape:
 

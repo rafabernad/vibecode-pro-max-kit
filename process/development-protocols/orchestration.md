@@ -17,7 +17,7 @@ metadata:
 When spawning subagents, always include:
 
 1. Work context path: the git root for the primary files being touched
-2. Plans path: `{work_context}/process/general-plans/active/` (plans inside `{slug}_{date}/` task subfolders)
+2. Plans path: `{work_context}/process/general-plans/active/` only when repo-local execution contracts are part of the workflow
 3. Feature: optional, but required when the work belongs to a feature-scoped folder
 
 Feature override paths:
@@ -26,6 +26,12 @@ Feature override paths:
 - Reports and references are co-located inside task folders (not sibling dirs); legacy `reports/` and `references/` sibling dirs are read-only
 
 Rule: if the current shell CWD differs from the real work context, pass the work-context paths, not the shell CWD.
+
+Tracker-native rule:
+
+- If `/.vc-project.json` sets `planning.mode` to `tracker-native`, the external tracker is the source of truth for active work management.
+- In that mode, pass repo-local `Plans:` paths only when a repo-local execution contract or compatibility bridge actually exists or is intentionally being created.
+- Absence of repo-local active plans is normal in tracker-native mode and must not block routing.
 
 ### Agent Frontmatter Conventions (spawn context)
 
@@ -45,7 +51,7 @@ Before setting `Feature:` in a subagent prompt:
 1. Check whether `process/features/{topic}/` already exists.
 2. Check whether the request clearly belongs to an existing feature.
 3. If the request is a new multi-phase product area or the user frames it as a substantial feature, create a feature folder first.
-4. Otherwise default to `process/general-plans/active/`.
+4. Otherwise default to `process/general-plans/active/` only in repository-centric mode. In tracker-native mode, default to the tracker work block plus a minimal repo-local execution contract only if needed.
 
 When creating a new feature folder:
 
@@ -98,7 +104,7 @@ Rules:
 6. Team/orchestration helpers such as `team` or FAST-mode flows may not bypass the same human approval gates required by the canonical RIPER workflow.
 7. **Context routing depth:** `all-*.md` entrypoints are routers, not the full knowledge. Subagents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
 8. Summarize context rather than duplicate raw file contents in handoff prompts.
-9. Reuse existing active plans and context files — always check active plan surfaces before creating new artifacts.
+9. Reuse existing active plans and context files when they are part of the workflow. In tracker-native mode, check repo-local active-plan surfaces only as compatibility hints; do not invent local plan work just to satisfy process.
 
 Prompt template:
 
@@ -108,12 +114,12 @@ Files to modify: [list]
 Files to read for context: [list]
 Acceptance criteria: [list]
 Constraints: [list]
-Plan reference: [exact plan file path or phase path]
+Plan reference: [exact repo-local plan file path or phase path when one exists; otherwise tracker block / external execution contract reference]
 
 Work context: [project path]
 Feature: [feature-name]
-Reports: [reports path]
-Plans: [plans path]
+Reports: [repo-local reports path when used]
+Plans: [repo-local plans path when used]
 Relevant skills: [comma-separated skill names]
 ```
 

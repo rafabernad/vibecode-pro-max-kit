@@ -188,7 +188,7 @@ The complete RIPER-5 protocol is defined in the canonical markdown agent files a
 | RESEARCH | vc-research-agent | "ENTER RESEARCH MODE" or feature request detected | Research findings in chat | Trivial fix / existing plan found |
 | SPEC | vc-spec-agent | "ENTER SPEC MODE" or "go" after RESEARCH | Product-discovery requirements doc (`*_SPEC_*.md`) in the task folder | Trivial fix (orchestrator-classified) / phase-program inner loop (umbrella SPEC governs) |
 | INNOVATE | vc-innovate-agent | "go" or "ENTER INNOVATE MODE" after SPEC | Decision summary: chosen approach + rejected alternatives | Scope is purely mechanical, no design choices |
-| PLAN | vc-plan-agent | "go" or "ENTER PLAN MODE" after INNOVATE | `*_PLAN_*.md` file inside a task folder under `process/features/*/active/{slug}_{date}/` or `process/general-plans/active/{slug}_{date}/` | None — plan is always required before EXECUTE for non-trivial work |
+| PLAN | vc-plan-agent | "go" or "ENTER PLAN MODE" after INNOVATE | Repo-local `*_PLAN_*.md` execution contract inside a task folder when the workflow uses one; in tracker-native mode the primary plan may live in the external tracker and the repo-local artifact is optional | None — an approved execution contract is always required before EXECUTE for non-trivial work, but it does not have to be repo-local in tracker-native mode |
 | VALIDATE | vc-validate-agent | "ENTER VALIDATE MODE" or auto-suggested after PLAN | Validate-contract section appended to plan file | Trivial fix with no plan file AND no schema/auth/API/billing surface changes |
 | EXECUTE | vc-execute-agent | Explicit "ENTER EXECUTE MODE" after VALIDATE (or PLAN for trivial) | Modified source files, test results | None — explicit approval always required |
 | UPDATE PROCESS | vc-update-process-agent | "ENTER UPDATE PROCESS MODE" after EXECUTE | Archived plan, updated context docs, memory notes | Skippable but not recommended for non-trivial sessions |
@@ -208,8 +208,9 @@ The complete RIPER-5 protocol is defined in the canonical markdown agent files a
 
 ### Mode Detection & Auto-Orchestration
 
-Feature → full RIPER-5; question → research/direct; trivial/bug → execute/debugger; existing active
-plan always resumes first. Score ambiguity per `vc-intent-clarify`. **Full Detect-Intent patterns,
+Feature → full RIPER-5; question → research/direct; trivial/bug → execute/debugger; existing repo-local
+plan resumes first only when the workflow actually uses repo-local execution contracts. In tracker-native
+mode, absence of a local plan is normal. Score ambiguity per `vc-intent-clarify`. **Full Detect-Intent patterns,
 multi-intent precedence, and Gather/Route/Monitor: `process/development-protocols/orchestration.md`
 §Intent Routing.** Multi-phase programs (3+ dependent phases): `process/development-protocols/phase-programs.md`.
 
@@ -259,7 +260,8 @@ See `process/context/all-context.md` for project technology stack, structure, an
 Claude Code and Codex share the `process/` directory. Full rules:
 `process/development-protocols/plan-lifecycle.md` (§Task-Folder Framework + §Feature Folder Lifecycle).
 
-- `process/general-plans/` — general plans. New plans use the task-folder convention
+- `process/general-plans/` — general plans in repository-centric mode; compatibility execution-contract
+  surface in tracker-native mode. New repo-local plans use the task-folder convention
   (`{slug}_{dd-mm-yy}/` holding `{slug}_PLAN_{dd-mm-yy}.md` + colocated artifacts such as reports and reference notes). Legacy flat
   `*_PLAN_*.md` / `PLAN.md` / `phase-*.md` shapes are READ-ONLY for audits/resume, never new-write targets.
 - `process/context/` — source of truth for durable project knowledge. Read
@@ -268,7 +270,8 @@ Claude Code and Codex share the `process/` directory. Full rules:
 - `process/features/{feature}/` — feature-scoped storage (`active/`, `completed/`, `backlog/`);
   sibling `reports/`/`references/` are deprecated (artifacts go inside the task folder). Use when a
   feature has 5+ artifacts; pass `Feature: {feature-name}` and override `Plans:` to the feature's
-  `active/{slug}_{date}/`. Otherwise use `process/general-plans/`. Current feature list:
+  `active/{slug}_{date}/`. In tracker-native mode, `active/` and `backlog/` are compatibility surfaces,
+  not the primary backlog/plan system. Otherwise use `process/general-plans/`. Current feature list:
   `process/context/all-context.md`.
 
 When routing to subagents, always pass relevant `process/context/` files.

@@ -47,6 +47,12 @@ ONLY enter after explicit "ENTER UPDATE PROCESS MODE" command and after completi
 
 When the orchestrator passes `Work context`, `Feature`, `Reports`, `Plans`, or one exact selected plan file path, treat those as authoritative scope hints. If `Feature:` is present, use the matching `process/features/{feature}/{active,completed,backlog,reports,references}` surfaces instead of assuming general-plan paths. Treat direct `*_PLAN_*.md`, legacy `PLAN.md`, legacy `plan.md`, and active `phase-*` files as valid compatibility shapes during scans, updates, archival decisions, and resume-safe execute anchoring.
 
+Tracker-native rule:
+
+- If `/.vc-project.json` sets `planning.mode` to `tracker-native`, the external tracker is the source of truth for progress, backlog, and active-work state.
+- In that mode, repo-local plans, reports, and closeout files are optional technical execution artifacts only.
+- UPDATE PROCESS must not recreate local backlog or local plan-tracking just to satisfy ceremony.
+
 ## Required 6-Phase Process
 
 ### Session Start — FIRST ACTIONS (mandatory before any phase work)
@@ -63,14 +69,14 @@ This is the first action, not optional. Do not open any plan file or context fil
 
 **Step 0b: invoke `vc-review-situation`** — after vc-context-discovery, invoke `vc-review-situation` to confirm:
 - Current branch and worktree state
-- Active-plan list (which plans are still in `active/` before archival decisions are made)
+- Active repo-local plan list when repo-local execution contracts are part of the workflow
 - Any uncommitted changes that affect archival decisions
 
-**invoke `vc-plan-discovery`:** Load related plans for the current task alongside `vc-context-discovery`. Pass the feature name (if provided) or task domain. Covers same-feature plans at full depth (active/backlog/completed/reports/refs) and other-feature active plans plus general-plans active, both via frontmatter.
+**invoke `vc-plan-discovery`:** Load related plans for the current task alongside `vc-context-discovery` only when repo-local plan artifacts are part of the workflow. Pass the feature name (if provided) or task domain. In tracker-native mode, skip when no repo-local execution contract / compatibility bridge exists.
 
 **Context Envelope (canonical C-2 order):** At session start, populate the 10-field Context Envelope in the EXACT canonical order documented in `.claude/skills/vc-context-discovery/SKILL.md` §Context Envelope: `feature → phase → session-goal → branch → worktree → context-group → blast-radius-packages → active-plan → test-runner → validate-contract`. The `phase` field is `UPDATE-PROCESS` for this agent; the `test-runner` multi-runner value uses the pipe-delimited DISPLAY format (`bun test | vitest`) that the phase-loop workflow template expands into SEQUENTIAL steps.
 
-**Step 0c: invoke `vc-generate-closeout`** — MANDATORY before archiving any plan or updating umbrella state.
+**Step 0c: invoke `vc-generate-closeout`** — MANDATORY before archiving any repo-local plan or updating umbrella state when a repo-local execution artifact exists. In tracker-native mode without a repo-local execution artifact, use closeout as a chat-level synthesis and technical evidence step, not as a trigger to manufacture local plan files.
 
 **Step 0c-pre: Parse EVL HANDOFF SUMMARY if present.** If the orchestrator handoff prompt contains a `EVL HANDOFF SUMMARY:` fenced block (see behavior-reference Section 6 EVL Step 6 for the format), parse its fields before opening any disk files:
 - `preliminary_packet_path:` — use this as the direct path (skip default path search if present). **Fallback:** If `preliminary_packet_path:` is present but the file does not exist on disk: emit `PRELIMINARY_PACKET_MISSING: [path]` warning and fall back to the default path search (proceed as if the field were absent). Do not hard-stop — the preliminary packet may not have been written yet.
@@ -78,7 +84,7 @@ This is the first action, not optional. Do not open any plan file or context fil
 - `known_gaps:` and `follow_up_stubs:` — note these for Phase 2 gap analysis
 If no structured block is present, proceed with default preliminary packet path search as specified below.
 
-**Task-folder artefact colocation:** Every artefact this agent produces — phase reports, closeout packets, audit outputs, autoresearch iteration reports + `results.tsv`, and any scratch/research notes — MUST be written INSIDE the task's folder (`process/features/{feature}/active/{slug}_{dd-mm-yy}/` for feature-scoped, `process/general-plans/active/{slug}_{dd-mm-yy}/` for general). Use filenames `{slug}_{TYPE}_{dd-mm-yy}.md` (TYPE ∈ PLAN|SPEC|REPORT|REF). Never write to the deprecated sibling `reports/` or `references/` dirs or any ad-hoc location. On completion the whole folder moves as a unit (active/ → completed/, later → backlog/).
+**Task-folder artefact colocation:** Every repo-local artefact this agent produces — phase reports, closeout packets, audit outputs, autoresearch iteration reports + `results.tsv`, and any scratch/research notes — MUST be written INSIDE the task's folder (`process/features/{feature}/active/{slug}_{dd-mm-yy}/` for feature-scoped, `process/general-plans/active/{slug}_{dd-mm-yy}/` for general). Use filenames `{slug}_{TYPE}_{dd-mm-yy}.md` (TYPE ∈ PLAN|SPEC|REPORT|REF). Never write to the deprecated sibling `reports/` or `references/` dirs or any ad-hoc location. In tracker-native mode, write repo-local artefacts only when a repo-local execution contract exists or technical evidence genuinely needs to live with code. On completion the whole folder moves as a unit (active/ → completed/, later → backlog/) when repo-local artifact management is in use.
 
 Before invoking vc-generate-closeout: check whether a EVL preliminary packet exists on disk.
 - Feature-scoped plan: `process/features/{feature}/active/{slug}_{date}/{slug}_REPORT_{date}.md` (inside task folder — new convention) or legacy `process/features/{feature}/reports/{phase-slug}-evl-preliminary.md`
@@ -171,10 +177,11 @@ Location: [Where in file - section name or append location]
 - Update "What's Functional Now" with [specific additions]
 - Document deviations: [list specific deviations from self-review]
 - Add to lessons learned: [specific lessons]
-- Archive completed plans to:
+- Archive completed repo-local plans to:
   - `process/general-plans/completed/` (for root plans)
   - `process/features/{feature}/completed/` (for feature-scoped plans)
 - Also: tick Step 7 checkbox in the `## Phase Loop Progress` section of the phase plan file: `- [x] 7. UPDATE PROCESS — archived; context updated; committed`. This is required for the next inner-loop cycle's V1 auto-proceed check to work correctly.
+- In tracker-native mode, skip this whole item when no repo-local execution contract exists. Do not create one retroactively just to archive it.
 
 **2b. Phase Program Updates** (if the work used an umbrella plan plus per-phase plans):
 - Determine whether this was a normal one-plan task or a phase program under `process/features/{feature}/`
@@ -221,7 +228,7 @@ Location: [Where in file - section name or append location]
   - UI/UX patterns/components → `uiux.md`
   - Skill runtime/app changes → the relevant skill-app or skill-system context doc
   - Workflow package changes → `cf-workflows.md`
-  - Known bugs/tech debt → `process/general-plans/backlog/backlog.md` or `process/features/{feature}/backlog/`
+  - Known bugs/tech debt → repo backlog surfaces only in repository-centric mode or when the project explicitly keeps a repo-local compatibility backlog; otherwise route them to the external tracker
   - New context file needed → create it in the owning group when one exists, otherwise root; update `process/context/all-context.md` and the owning `all-{group}.md`
 - Examples of what to update: new API endpoints, new routes/pages, new utilities, changed data flows, new env vars, new test patterns
 - If a context file exceeds roughly 800 lines and has separable subtopics, flag it for context group promotion and suggest `vc-audit-context`.
