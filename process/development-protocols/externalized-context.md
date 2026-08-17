@@ -4,14 +4,14 @@ description: "How to keep project context outside the product repo while preserv
 
 # Externalized Context
 
-This protocol supports a thin-repo setup where the harness still runs locally, but the
-durable project context is stored in a separate Git repository.
+This protocol supports thin-repo setups where the harness still runs locally, but the
+durable project context is stored outside the product repository.
 
 The goal is operational compatibility, not a new routing model:
 
-- Agents still read `process/context/` locally.
-- The product repo keeps only a small pointer/config surface.
-- The authoritative context content lives elsewhere and is synced into the working tree on demand.
+- agents still read `process/context/` locally
+- the product repo keeps only a small pointer/config surface
+- the authoritative context content lives elsewhere and is synced into a disposable local mirror on demand
 
 ## When To Use
 
@@ -36,6 +36,30 @@ Shape:
 
 ```json
 {
+  "planning": {
+    "mode": "tracker-native"
+  },
+  "tracker": {
+    "mode": "external",
+    "provider": "github",
+    "owner": "your-org",
+    "repository": "your-repo"
+  },
+  "context": {
+    "mode": "github-wiki",
+    "githubWiki": {
+      "ref": "master",
+      "subpath": "process/context",
+      "syncInto": "process/context"
+    }
+  }
+}
+```
+
+Alternate Git-repo-backed mode:
+
+```json
+{
   "context": {
     "mode": "external",
     "external": {
@@ -53,8 +77,21 @@ Rules:
 - `context.mode`
   - `repo` means the repo owns `process/context/` directly.
   - `external` means the repo hydrates `process/context/` from another Git repository.
+- `github-wiki` means the repo hydrates `process/context/` from the GitHub wiki attached to the tracked repository and should publish durable context changes back there.
 - `context.external.repository`
   - Required in external mode.
+- `context.githubWiki`
+  - Supported when `planning.mode` is `tracker-native`.
+- `context.githubWiki.owner` / `context.githubWiki.repository`
+  - Optional overrides. If omitted, the script reuses `tracker.owner` and `tracker.repository`.
+- `context.githubWiki.remote`
+  - Optional full clone URL override, mainly for nonstandard hosting or tests.
+- `context.githubWiki.ref`
+  - Wiki branch or ref. Default: `master`.
+- `context.githubWiki.subpath`
+  - Path inside the wiki repository that contains the context tree. Default: `process/context`.
+- `context.githubWiki.syncInto`
+  - Local materialization target. Default: `process/context`.
 - `context.external.ref`
   - Branch or other Git ref to sync.
 - `context.external.subpath`
@@ -67,43 +104,53 @@ Rules:
 Use:
 
 ```bash
-node scripts/vc-sync-external-context.mjs
+node scripts/vc-sync-external-context.mjs pull
+node scripts/vc-sync-external-context.mjs push
 ```
 
 Behavior:
 
-1. Reads `/.vc-project.json`
-2. Clones or fetches the external context repository into `.git/vc-external-context/`
-3. Materializes the configured context subtree into the local `process/context/`
-4. Records sync state under `.git/vc-external-context/.../state.json`
-5. Adds the hydrated context path to `.git/info/exclude` so the synced files do not pollute normal `git status`
+1. reads `/.vc-project.json`
+2. clones or fetches the configured context source into `.git/vc-external-context/`
+3. if the external source uses Git submodules, `pull` refreshes them with `git submodule update --init --recursive --remote`
+4. `pull` materializes the configured subtree into local `process/context/`
+5. `push` mirrors the local hydrated tree back into the external source and commits it there
+6. records sync state under `.git/vc-external-context/.../state.json`
+7. adds the hydrated context path to `.git/info/exclude` so the local mirror does not pollute normal `git status`
 
 Important constraints:
 
-- This keeps the existing agent contract intact because the final local path is still `process/context/`.
-- Tracked kit files already present under `process/context/`, such as `generated-skills-catalog.json`, are preserved.
-- The external repository becomes the authority for the hydrated files, not the product repo.
+- this keeps the existing agent contract intact because the final local path is still `process/context/`
+- tracked kit files already present under `process/context/`, such as `generated-skills-catalog.json`, are preserved
+- the external repository or wiki becomes the authority for the hydrated files, not the product repo
+- in `tracker-native` + `github-wiki` mode, context markdown should be treated as disposable local cache, not as committed application source
 
 ## Recommended Layout
 
-Use a dedicated context repository, not GitHub Packages, for project knowledge.
+Use one of these durable homes for project knowledge:
+
+- dedicated context Git repository
+- GitHub wiki attached to the tracked repository when `planning.mode` is `tracker-native`
 
 Recommended split:
 
-- Harness distribution: package, release artifact, or kit repository
-- Project context: separate Git repository
-- Product repo: code + minimal pointer config only
+- harness distribution: package, release artifact, or kit repository
+- project context: separate Git repository or GitHub wiki
+- product repo: code + minimal pointer config only
 
 Why:
 
-- Git handles Markdown/doc diffs, review, branching, and history better than Packages.
-- Packages are better for shipping reusable artifacts than for maintaining evolving operational knowledge.
+- git handles Markdown/doc diffs, review, branching, and history better than Packages
+- the wiki path is especially useful when the team already operates in GitHub Projects/issues and wants tracker-native storage with no context markdown committed into the product repo
+- Packages are better for shipping reusable artifacts than for maintaining evolving operational knowledge
 
 ## Operational Notes
 
-- Run the sync before starting substantial work when `context.mode` is `external`.
-- If the external context repo changes, re-run the sync to refresh the local mirror.
-- If you change the local target path away from `process/context`, update root contracts and discovery scripts in the same patch. The default protocol assumes `process/context/`.
+- run `pull` before starting substantial work when `context.mode` is `external` or `github-wiki`
+- when the external context source uses submodules, `pull` is also responsible for advancing them to the latest remote revision
+- run `push` after durable context edits when the authoritative source is outside the product repo
+- if the external context source changes, re-run `pull` to refresh the local mirror
+- if you change the local target path away from `process/context`, update root contracts and discovery scripts in the same patch. The default protocol assumes `process/context/`
 
 ## Current Scope
 
@@ -112,11 +159,12 @@ This is a thin-repo compatibility layer, not a full remote-context platform.
 Current tranche includes:
 
 - config contract
-- local sync script
+- pull/push sync script
+- GitHub wiki support for tracker-native projects
 - root-contract documentation
 
 Future work, if needed:
 
 - automatic preflight sync in setup/update flows
-- optional push-back workflow for context edits
+- smarter conflict handling when both local cache and remote source changed
 - support for a repo-local context stub that can switch between multiple external sources

@@ -34,6 +34,10 @@ Optional input: a package, app, feature, context group, or architectural area to
    ```bash
    node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
    ```
+9. If `/.vc-project.json` makes an external durable context surface authoritative (`context.mode = external` or `github-wiki`), publish the refreshed context with:
+   ```bash
+   node scripts/vc-sync-external-context.mjs push
+   ```
 
 ## Rules
 
@@ -44,6 +48,7 @@ Optional input: a package, app, feature, context group, or architectural area to
 - Prefer concise, factual, path-specific documentation.
 - Use `pnpm` terminology for package management.
 - Treat validation failures as blockers before presenting context as refreshed.
+- In `tracker-native` + `github-wiki` mode, do not leave durable context changes only in the local hydrated cache. Push them to the authoritative surface before closing the task.
 
 ## Invocation Modes
 

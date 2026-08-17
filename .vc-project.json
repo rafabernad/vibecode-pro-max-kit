@@ -20,6 +20,14 @@
       "ref": "main",
       "subpath": "process/context",
       "syncInto": "process/context"
+    },
+    "githubWiki": {
+      "owner": "",
+      "repository": "",
+      "remote": "",
+      "ref": "master",
+      "subpath": "process/context",
+      "syncInto": "process/context"
     }
   }
 }

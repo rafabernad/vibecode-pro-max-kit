@@ -103,6 +103,14 @@ node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
 Fix validation failures before presenting the context as refreshed. Treat warnings as freshness
 or quality findings unless the user asks for strict enforcement.
 
+If `/.vc-project.json` declares that durable context lives outside the product repo (`context.mode = external` or `github-wiki`), publish the refreshed context after validation:
+
+```bash
+node scripts/vc-sync-external-context.mjs push
+```
+
+In `tracker-native` + `github-wiki` mode, the local `process/context/` tree is only a hydrated cache. Do not stop after local edits; push the durable version back to the wiki.
+
 ## Data Sources
 
 Inspect as relevant:

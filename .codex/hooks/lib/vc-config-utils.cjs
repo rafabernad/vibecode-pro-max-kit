@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawnSync } = require('child_process');
 
 const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
 const LOCAL_CONFIG_PATH = '.codex/.vc.json';
@@ -21,6 +21,7 @@ const LEGACY_CK_GLOBAL_CONFIG_PATH = path.join(os.homedir(), '.claude', '.ck.jso
 const SESSION_STATE_LOCK_TIMEOUT_MS = 500;
 const SESSION_STATE_LOCK_RETRY_MS = 10;
 const SESSION_STATE_LOCK_STALE_MS = 5000;
+const DURABLE_CONTEXT_SYNC_TIMEOUT_MS = 20000;
 
 // Legacy export for backward compatibility
 const CONFIG_PATH = LOCAL_CONFIG_PATH;
@@ -880,6 +881,116 @@ function getGitRoot(cwd = null) {
   return execSafe('git rev-parse --show-toplevel', { cwd: cwd || undefined });
 }
 
+function loadVcProjectConfig(cwd = null) {
+  const baseDir = cwd || process.cwd();
+  const gitRoot = getGitRoot(baseDir) || baseDir;
+  const configPath = path.join(gitRoot, '.vc-project.json');
+
+  if (!fs.existsSync(configPath)) {
+    return { root: gitRoot, path: configPath, config: null };
+  }
+
+  try {
+    return {
+      root: gitRoot,
+      path: configPath,
+      config: JSON.parse(fs.readFileSync(configPath, 'utf8'))
+    };
+  } catch {
+    return { root: gitRoot, path: configPath, config: null };
+  }
+}
+
+function resolveDurableContextSync(cwd = null) {
+  const loaded = loadVcProjectConfig(cwd);
+  const config = loaded.config;
+
+  if (!config) {
+    return {
+      enabled: false,
+      reason: 'missing-vc-project-config',
+      root: loaded.root,
+      path: loaded.path,
+      mode: 'repo'
+    };
+  }
+
+  const planningMode = config?.planning?.mode || 'repo';
+  const contextMode = config?.context?.mode || 'repo';
+  const tracker = config?.tracker || {};
+
+  if (contextMode === 'external') {
+    return {
+      enabled: true,
+      reason: 'external-context',
+      root: loaded.root,
+      path: loaded.path,
+      planningMode,
+      mode: contextMode,
+      trackerProvider: tracker.provider || '',
+      scriptPath: path.join(loaded.root, 'scripts', 'vc-sync-external-context.mjs')
+    };
+  }
+
+  if (contextMode === 'github-wiki' && planningMode === 'tracker-native') {
+    return {
+      enabled: true,
+      reason: 'github-wiki-context',
+      root: loaded.root,
+      path: loaded.path,
+      planningMode,
+      mode: contextMode,
+      trackerProvider: tracker.provider || '',
+      scriptPath: path.join(loaded.root, 'scripts', 'vc-sync-external-context.mjs')
+    };
+  }
+
+  return {
+    enabled: false,
+    reason: contextMode === 'github-wiki'
+      ? 'github-wiki-requires-tracker-native'
+      : 'repo-context',
+    root: loaded.root,
+    path: loaded.path,
+    planningMode,
+    mode: contextMode,
+    trackerProvider: tracker.provider || ''
+  };
+}
+
+function syncDurableContext(command, cwd = null) {
+  if (!['pull', 'push'].includes(command)) {
+    return { ok: false, skipped: true, reason: 'invalid-command' };
+  }
+
+  const sync = resolveDurableContextSync(cwd);
+  if (!sync.enabled) {
+    return { ok: true, skipped: true, reason: sync.reason, mode: sync.mode, planningMode: sync.planningMode || 'repo' };
+  }
+
+  if (!fs.existsSync(sync.scriptPath)) {
+    return { ok: false, skipped: true, reason: 'missing-sync-script', mode: sync.mode, root: sync.root };
+  }
+
+  const result = spawnSync('node', [sync.scriptPath, command], {
+    cwd: sync.root,
+    encoding: 'utf8',
+    timeout: DURABLE_CONTEXT_SYNC_TIMEOUT_MS,
+    stdio: 'pipe'
+  });
+
+  return {
+    ok: result.status === 0,
+    skipped: false,
+    command,
+    mode: sync.mode,
+    root: sync.root,
+    status: result.status,
+    stdout: (result.stdout || '').trim(),
+    stderr: (result.stderr || '').trim()
+  };
+}
+
 /**
  * Extract task list ID from plan resolution for shared task-list coordination
  * Only returns ID for session-resolved plans (explicitly active, not branch-suggested)
@@ -946,6 +1057,9 @@ module.exports = {
   resolveNamingPattern,
   getGitBranch,
   getGitRoot,
+  loadVcProjectConfig,
+  resolveDurableContextSync,
+  syncDurableContext,
   extractTaskListId,
   isHookEnabled
 };

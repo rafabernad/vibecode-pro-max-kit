@@ -25,7 +25,8 @@ try {
     getReportsPath,
     resolveNamingPattern,
     extractTaskListId,
-    isHookEnabled
+    isHookEnabled,
+    syncDurableContext
   } = require('./lib/vc-config-utils.cjs');
   const { createHookTimer, logHookCrash } = require('./lib/hook-logger.cjs');
   const { loadState, refreshStatuslineSnapshot } = require('./lib/session-state-manager.cjs');
@@ -129,6 +130,7 @@ async function main() {
 
     const config = loadConfig();
     const sessionStateEnabled = config.hooks?.['session-state'] !== false;
+    const durableContextPull = syncDurableContext('pull', process.cwd());
 
     const detections = {
       type: detectProjectType(config.project?.type),
@@ -214,6 +216,8 @@ async function main() {
       writeEnv(envFile, 'CK_PROJECT_TYPE', detections.type || '');
       writeEnv(envFile, 'CK_PACKAGE_MANAGER', detections.pm || '');
       writeEnv(envFile, 'CK_FRAMEWORK', detections.framework || '');
+      writeEnv(envFile, 'CK_CONTEXT_MODE', durableContextPull.mode || 'repo');
+      writeEnv(envFile, 'CK_CONTEXT_SYNC_ENABLED', durableContextPull.skipped ? 'false' : 'true');
 
       // NEW: Static environment info (so other hooks don't need to recompute)
       writeEnv(envFile, 'CK_NODE_VERSION', staticEnv.nodeVersion);
@@ -247,6 +251,13 @@ async function main() {
     }
 
     console.log(`Session ${source}. ${buildContextOutput(config, detections, resolved, staticEnv.gitRoot)}`);
+    if (!durableContextPull.skipped) {
+      if (durableContextPull.ok) {
+        console.log(`[session-init] durable context pull (${durableContextPull.mode}) complete.`);
+      } else {
+        console.log(`[session-init] durable context pull failed (${durableContextPull.mode}): ${durableContextPull.stderr || durableContextPull.stdout || 'unknown error'}`);
+      }
+    }
 
     const hasCleanup =
       shadowedCleanup.restored.length > 0 ||

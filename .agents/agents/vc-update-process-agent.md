@@ -52,6 +52,7 @@ Tracker-native rule:
 - If `/.vc-project.json` sets `planning.mode` to `tracker-native`, the external tracker is the source of truth for progress, backlog, and active-work state.
 - In that mode, repo-local plans, reports, and closeout files are optional technical execution artifacts only.
 - UPDATE PROCESS must not recreate local backlog or local plan-tracking just to satisfy ceremony.
+- If `/.vc-project.json` sets `context.mode` to `external` or `github-wiki`, durable context changes do not finish at the local hydrated tree. After context edits and validation, run `node scripts/vc-sync-external-context.mjs push` before closing the phase.
 
 ## Required 6-Phase Process
 
@@ -260,6 +261,7 @@ Location: [Where in file - section name or append location]
   - `vc-audit-context` when context routing, grouping, discoverability, or structural context edits changed
   - `vc-audit-plans` when stale active-plan reconciliation or session-close plan review is needed
 - If structural context changes happened, `vc-audit-context` is not optional housekeeping; it is the specialist validation step for the context layer.
+- After successful context validation, if the authoritative durable context surface is external (`context.mode = external` or `github-wiki`), publish it with `node scripts/vc-sync-external-context.mjs push`. In `tracker-native` + `github-wiki` mode, do not leave validated context changes only in the repo-local cache.
 
 **5b. Mirror Discipline — ALWAYS CHECK THIS:**
 - If shared workflow behavior changed, explicitly review all of:

@@ -2,7 +2,7 @@
 
 ## Bootstrap Guard
 
-**If `process/context/all-context.md` does not exist**, the harness has not been set up yet. (Note: `process/context/` itself may already hold only `generated-skills-catalog.json` from install — that alone does NOT count as set up.) Run `vc-setup` before any task — the context router, protocol docs, and the validator suite are absent and agents will not route correctly.
+**If `process/context/all-context.md` does not exist**, inspect `/.vc-project.json` before assuming setup is missing. If `context.mode` is `github-wiki`, or if `planning.mode` is `tracker-native` and context is hydrated from a GitHub wiki, run `node scripts/vc-sync-external-context.mjs pull` first. Only run `vc-setup` when neither repo-local context nor configured external/wiki context exists. (`process/context/` itself may still hold only `generated-skills-catalog.json` from install — that alone does NOT count as set up.)
 
 ---
 
@@ -167,7 +167,7 @@ plus `process/development-protocols/all-development-protocols.md`.
 
 **Context routing discipline:** `all-*.md` entrypoints are routers, not the full knowledge. Agents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
 
-**Thin-repo compatibility:** A repository may keep its durable context outside the product repo. If `/.vc-project.json` sets `context.mode` to `external`, run `node scripts/vc-sync-external-context.mjs` before substantial work, then use the hydrated local `process/context/` tree as the authoritative session context.
+**Thin-repo compatibility:** A repository may keep its durable context outside the product repo. If `/.vc-project.json` sets `context.mode` to `external` or `github-wiki`, run `node scripts/vc-sync-external-context.mjs pull` before substantial work, then use the hydrated local `process/context/` tree as the authoritative session context. In `tracker-native` + `github-wiki` mode, publish durable context edits with `node scripts/vc-sync-external-context.mjs push` instead of committing context markdown into the product repo.
 
 **Artifact-placement rule:** Do not treat the repo as the default home for backlog, plan tracking, phase status, or other work-management artifacts. Use `process/development-protocols/artifact-placement.md` to decide whether an artifact belongs in the repository, in external tracking, or should not be persisted at all.
 

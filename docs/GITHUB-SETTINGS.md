@@ -64,7 +64,7 @@ RIPER-5 agent harness for Claude Code & Codex — 12 specialist agents, 31 skill
 | Issues | ENABLE | Templates configured in Phase 2 |
 | Discussions | ENABLE | Community Q&A, announcements, show & tell |
 | Sponsorship | ENABLE | Linked to `.github/FUNDING.yml` |
-| Wiki | DISABLE | Use `docs/` directory instead for version control |
+| Wiki | CONDITIONAL | Enable when using `tracker-native` + `context.mode=github-wiki`; otherwise disable and keep long-form docs in `docs/` |
 | Projects | OPTIONAL | Enable if maintaining a public roadmap |
 | Preserve this repository | OFF | Not needed for active repo |
 | Merge button | Allow squash + merge, allow rebase + merge | Keep PR history clean |
@@ -123,7 +123,7 @@ After enabling Discussions and creating the 4 categories above, create and pin a
 - [ ] Enable Discussions and create 4 categories
 - [ ] Pin welcome discussion in Announcements category
 - [ ] Enable Sponsorship (requires `.github/FUNDING.yml` from Phase 2)
-- [ ] Disable Wiki
+- [ ] Decide wiki policy: enable for `tracker-native` context storage, otherwise disable
 - [ ] Enable "Auto-delete head branches"
 - [ ] Configure merge button (squash + rebase allowed)
 - [ ] Set up branch protection for `main` (require PR reviews, require status checks)

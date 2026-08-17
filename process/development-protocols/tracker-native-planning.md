@@ -21,6 +21,7 @@ In tracker-native mode:
 - the external tracker is the source of truth for work decomposition and progress
 - RIPER runs inside each tracked work block
 - the repository keeps only minimal execution-oriented artifacts when they are truly needed
+- durable context should default to an external surface, preferably the GitHub wiki attached to the tracked repository when `tracker.provider` is `github`
 
 This is the preferred mode for mature teams that want a clean repository and durable operational
 tracking outside the codebase.
@@ -124,6 +125,7 @@ Not allowed as defaults:
 - long progress reports
 - decomposition documents that simply restate issue hierarchy
 - long-lived active plan files whose primary job is coordination
+- committed context markdown in the product repository when `context.mode` is `github-wiki`
 
 ## vc-generate-plan Behavior
 
@@ -149,6 +151,61 @@ It should answer only:
 
 If a section exists only to mirror tracker state, remove it.
 
+## Operational Surface
+
+Tracker-native mode is not fully enforced unless the tracker is an operationally accessible surface.
+
+For GitHub-backed projects, the harness now provides a local adapter:
+
+```bash
+node scripts/vc-tracker-github.mjs status --json
+node scripts/vc-tracker-github.mjs next --json
+node scripts/vc-tracker-github.mjs set-riper --issue 123 --state Execute
+node scripts/vc-tracker-github.mjs comment --issue 123 --body-file /tmp/closeout.md
+node scripts/vc-tracker-github.mjs create-followup --title "Follow-up task" --body "..."
+```
+
+Expected behavior:
+
+- `status` and `next` are the first read surfaces for active work in `tracker-native` mode
+- `set-riper` updates the configured GitHub Project single-select field named by `tracker.riperField`
+- `comment` attaches closeout or evidence back to the issue instead of inventing repo-local progress logs
+- `create-followup` creates deferred work in the tracker instead of `process/.../backlog`
+
+Operational precedence in `tracker-native` mode:
+
+1. read the tracker adapter
+2. use repo-local execution contracts only when explicitly present or required by risk
+3. hydrate durable context from the configured external surface before substantial work
+4. do not recreate tracker state or durable context in repo-local markdown just because the repo is easier to scan
+
+## GitHub Wiki Context
+
+When `planning.mode` is `tracker-native` and `tracker.provider` is `github`, the preferred durable
+context surface is the repository wiki.
+
+Recommended config:
+
+```json
+{
+  "context": {
+    "mode": "github-wiki",
+    "githubWiki": {
+      "ref": "master",
+      "subpath": "process/context",
+      "syncInto": "process/context"
+    }
+  }
+}
+```
+
+Rules:
+
+- run `node scripts/vc-sync-external-context.mjs pull` before substantial work
+- treat the hydrated `process/context/` tree as local cache, not durable repo content
+- run `node scripts/vc-sync-external-context.mjs push` after durable context edits
+- do not commit context markdown changes into the product repository when the wiki is authoritative
+
 ## Migration Rule
 
 When moving from markdown-plan mode to tracker-native mode:
@@ -160,7 +217,6 @@ When moving from markdown-plan mode to tracker-native mode:
 
 ## Current Limitation
 
-This protocol defines the operating contract.
-
-It does not by itself create or update tracker items. Full automation requires a connected tracker
-integration, for example GitHub issue/project tooling.
+The GitHub adapter provides a real operational surface, but enforcement is still partial until every
+plan/audit/resume helper reads it before falling back to repo-local artefacts. Any surface that still
+assumes local plan inventory is primary can reintroduce repo-centric drift.

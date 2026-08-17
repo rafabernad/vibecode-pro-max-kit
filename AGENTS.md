@@ -1,6 +1,6 @@
 # AGENTS.md
 
-**Bootstrap guard:** If `process/context/all-context.md` does not exist, the harness has not been set up yet (a bare `process/context/` holding only `generated-skills-catalog.json` from install does NOT count). Run `vc-setup` before any task — the context router and protocol docs are absent and agents will not route correctly.
+**Bootstrap guard:** If `process/context/all-context.md` does not exist, first inspect `/.vc-project.json`. When `context.mode` is `github-wiki`, or when `planning.mode` is `tracker-native` and context is hydrated from a GitHub wiki, run `node scripts/vc-sync-external-context.mjs pull` before assuming setup is missing. Only run `vc-setup` when neither a repo-local context nor a configured external/wiki context exists. A bare `process/context/` holding only `generated-skills-catalog.json` from install still does NOT count as setup.
 
 This file is the top-level agent-facing contract for the repository.
 
@@ -96,7 +96,7 @@ Before substantial planning or implementation work, consult:
 
 **Context routing discipline:** `all-*.md` entrypoints are routers, not the full knowledge. Agents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
 
-**Thin-repo compatibility:** A repository may externalize its durable context while preserving the same local path contract. If `/.vc-project.json` sets `context.mode` to `external`, sync the configured external context before substantial work with `node scripts/vc-sync-external-context.mjs`, then treat the hydrated local `process/context/` tree as authoritative for the current session.
+**Thin-repo compatibility:** A repository may externalize its durable context while preserving the same local path contract. If `/.vc-project.json` sets `context.mode` to `external` or `github-wiki`, hydrate context before substantial work with `node scripts/vc-sync-external-context.mjs pull`, then treat the hydrated local `process/context/` tree as authoritative for the current session. In `tracker-native` + `github-wiki` mode, publish durable context updates with `node scripts/vc-sync-external-context.mjs push` instead of committing context markdown into the product repo.
 
 **Artifact-placement rule:** Do not default to storing backlog, plan tracking, phase status, or other work-management outputs in the repo. Use `process/development-protocols/artifact-placement.md` to decide whether an artifact belongs in the repository, in an external tracker, or should not be persisted at all.
 
@@ -235,7 +235,8 @@ entrypoints, update this router and agent prompts in the same patch, and run the
 
 Externalized-context note:
 
-- The authoritative source may be another Git repository, but agents still consume a local hydrated `process/context/` tree.
+- The authoritative source may be another Git repository or the repository's GitHub wiki, but agents still consume a local hydrated `process/context/` tree.
+- In `tracker-native` + `github-wiki` mode, treat the hydrated tree as disposable local cache. Durable context lives in the wiki, not in the code repository history.
 - Keep the local path stable unless you are intentionally changing the global protocol.
 
 ### `process/features/`

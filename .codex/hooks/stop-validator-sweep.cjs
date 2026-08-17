@@ -15,6 +15,7 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const { spawnSync } = require("node:child_process");
+const { syncDurableContext } = require("./lib/vc-config-utils.cjs");
 
 const HOOK_DIR = __dirname;
 const REPO_ROOT = path.resolve(HOOK_DIR, "..", "..");
@@ -105,6 +106,9 @@ function main() {
   if (!dirty.length) process.exit(0);
 
   const lines = [];
+  let contextValidatorsFailed = false;
+  const dirtyContext = dirty.some((file) => /^process\/context\//.test(file));
+
   for (const group of GROUPS) {
     if (!dirty.some((f) => group.pathRe.test(f))) continue;
 
@@ -117,11 +121,26 @@ function main() {
 
       if (fails > 0) {
         lines.push(`  [FAIL ${fails}] ${group.name}: ${path.basename(rel)}`);
+        if (group.name === "context") contextValidatorsFailed = true;
       } else if (!parsed && res.status !== 0) {
         // Non-JSON output AND non-zero exit — surface as a possible failure.
         lines.push(`  [FAIL?] ${group.name}: ${path.basename(rel)} (exit ${res.status})`);
+        if (group.name === "context") contextValidatorsFailed = true;
       } else if (warns > 0) {
         lines.push(`  [warn ${warns}] ${group.name}: ${path.basename(rel)}`);
+      }
+    }
+  }
+
+  if (dirtyContext) {
+    if (contextValidatorsFailed) {
+      lines.push("  [skip] durable-context push skipped because context validators reported failures");
+    } else {
+      const push = syncDurableContext("push", REPO_ROOT);
+      if (!push.skipped && push.ok) {
+        lines.push(`  [push] durable-context synced via ${push.mode}`);
+      } else if (!push.skipped) {
+        lines.push(`  [push-fail] durable-context sync failed: ${push.stderr || push.stdout || "unknown error"}`);
       }
     }
   }
