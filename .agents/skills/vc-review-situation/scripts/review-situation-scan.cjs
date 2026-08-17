@@ -5,13 +5,14 @@ const { spawnSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { readSessionState } = require('../../../hooks/lib/vc-config-utils.cjs');
+const { readSessionState } = require('../../../../.claude/hooks/lib/vc-config-utils.cjs');
 
 const DEFAULTS = {
   maxBranches: 12,
   commitsPerBranch: 3,
   planLimit: 8,
   maxPlanRefs: 80,
+  trackerLimit: 20,
 };
 
 const PRIMARY_PLAN_PATTERNS = [/^[^/]+_PLAN_\d{2}-\d{2}-\d{2}\.md$/i, /^PLAN\.md$/i, /^plan\.md$/i];
@@ -46,6 +47,7 @@ function parseArgs(argv) {
     since: null,
     cwd: process.cwd(),
     selectedPlan: null,
+    trackerMock: process.env.VC_TRACKER_MOCK || null,
     ...DEFAULTS,
   };
 
@@ -65,10 +67,15 @@ function parseArgs(argv) {
       options.selectedPlan = parseRequiredValue(argv, index, '--selected-plan');
       index += 1;
     }
+    else if (arg === '--tracker-mock') {
+      options.trackerMock = path.resolve(parseRequiredValue(argv, index, '--tracker-mock'));
+      index += 1;
+    }
     else if (arg === '--max-branches') options.maxBranches = parsePositiveInt(argv[++index], '--max-branches');
     else if (arg === '--commits-per-branch') options.commitsPerBranch = parsePositiveInt(argv[++index], '--commits-per-branch');
     else if (arg === '--plan-limit') options.planLimit = parsePositiveInt(argv[++index], '--plan-limit');
     else if (arg === '--max-plan-refs') options.maxPlanRefs = parsePositiveInt(argv[++index], '--max-plan-refs');
+    else if (arg === '--tracker-limit') options.trackerLimit = parsePositiveInt(argv[++index], '--tracker-limit');
     else if (arg === '--help' || arg === '-h') options.help = true;
     else throw new Error(`Unknown option: ${arg}`);
   }
@@ -87,6 +94,7 @@ Options:
   --fetch                  Run git fetch --all --prune before scanning
   --cwd <path>             Scan a different checkout root
   --selected-plan <path>   Provide an explicit selected-plan hint
+  --tracker-mock <path>    Use a local tracker mock payload instead of gh
   --since <date>           Limit per-branch commit samples, e.g. "14 days ago"
   --max-branches <n>       Branches to summarize in handoff output
   --commits-per-branch <n> Commit subjects per summarized branch
@@ -116,6 +124,56 @@ function tryGit(args, cwd, { ok = [0] } = {}) {
 function getGitRoot(cwd) {
   const result = tryGit(['rev-parse', '--show-toplevel'], cwd);
   return result.ok && result.stdout ? result.stdout : cwd;
+}
+
+function readProjectTrackerConfig(root) {
+  const configPath = path.join(root, '.vc-project.json');
+  if (!fs.existsSync(configPath)) return null;
+
+  try {
+    const parsed = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    return {
+      planningMode: parsed?.planning?.mode || 'repo',
+      trackerMode: parsed?.tracker?.mode || 'none',
+      provider: parsed?.tracker?.provider || '',
+      owner: parsed?.tracker?.owner || '',
+      repository: parsed?.tracker?.repository || '',
+    };
+  } catch {
+    return null;
+  }
+}
+
+function loadTrackerStatus(root, options, warnings) {
+  const trackerConfig = readProjectTrackerConfig(root);
+  if (!trackerConfig) return null;
+  if (trackerConfig.planningMode !== 'tracker-native') return null;
+
+  const args = ['scripts/vc-tracker-github.mjs', 'status', '--json', '--cwd', root, '--limit', String(options.trackerLimit)];
+  if (options.trackerMock) args.push('--mock', options.trackerMock);
+
+  const result = spawnSync('node', args, { cwd: root, encoding: 'utf8' });
+  if (result.status !== 0) {
+    warnings.push(`Tracker status query failed: ${(result.stderr || result.stdout || 'unknown error').trim()}`);
+    return {
+      ok: false,
+      planningMode: trackerConfig.planningMode,
+      tracker: trackerConfig,
+      warnings: ['tracker query failed'],
+    };
+  }
+
+  try {
+    return JSON.parse(result.stdout || '{}');
+  } catch {
+    warnings.push('Tracker status query returned invalid JSON.');
+    return {
+      ok: false,
+      planningMode: trackerConfig.planningMode,
+      tracker: trackerConfig,
+      warnings: ['tracker query returned invalid JSON'],
+    };
+  }
 }
 
 function parseWorktrees(output) {
@@ -520,9 +578,13 @@ function buildWarnings(payload) {
   if (!payload.options.fetchRequested && payload.refs.remote > 0) {
     warnings.push('Remote branches reflect local refs only. Use --fetch to refresh before treating them as current.');
   }
-  if (payload.plans.total === 0) {
+  if (payload.plans.total === 0 && payload.tracker?.planningMode !== 'tracker-native') {
     warnings.push('No active plan files were found under process/general-plans/active/ or process/features/*/active/.');
   }
+  if (payload.tracker?.planningMode === 'tracker-native' && payload.tracker?.ok === false) {
+    warnings.push('Tracker-native mode is enabled, but tracker status could not be read.');
+  }
+  if (payload.tracker?.warnings?.length) warnings.push(...payload.tracker.warnings);
   if (!payload.selectedPlanHint && payload.plans.localPrimaryCount > 1) {
     warnings.push('Multiple primary active plans exist locally; no selected-plan hint is being assumed.');
   }
@@ -547,6 +609,9 @@ function buildNextSteps(payload) {
 
   if (payload.current.dirty) steps.push('Review or commit current worktree changes before handoff.');
   if (payload.current.detached) steps.push('Create or switch to a named branch before shipping work from this checkout.');
+  if (payload.tracker?.next) {
+    steps.push(`Tracker-native next issue: #${payload.tracker.next.number} ${payload.tracker.next.title}.`);
+  }
   if (payload.selectedPlanHint) {
     steps.push(`If execution should continue, confirm the selected plan explicitly: ${payload.selectedPlanHint.path}.`);
   } else if (payload.plans.localPrimaryCount > 0) {
@@ -572,6 +637,13 @@ function renderText(payload) {
     `- Dirty: ${payload.current.dirty ? `yes (${payload.current.dirtyCount} file${payload.current.dirtyCount === 1 ? '' : 's'})` : 'no'}`,
     `- Worktrees: ${payload.worktrees.length}`,
   ];
+
+  if (payload.tracker?.planningMode === 'tracker-native') {
+    lines.push(`- Tracker mode: ${payload.tracker.ok ? `github (${payload.tracker.tracker?.owner || payload.tracker.tracker?.repo || 'configured'})` : 'configured but unavailable'}`);
+    if (payload.tracker?.next) {
+      lines.push(`- Tracker next: #${payload.tracker.next.number} ${payload.tracker.next.title}`);
+    }
+  }
 
   if (payload.current.ahead || payload.current.behind) {
     lines.push(`- Ahead/behind: +${payload.current.ahead} / -${payload.current.behind}`);
@@ -603,6 +675,22 @@ function renderText(payload) {
       const tags = [plan.kind, plan.status];
       if (plan.feature) tags.push(`feature:${plan.feature}`);
       lines.push(`- ${plan.path} [${tags.join(', ')}] via ${source || 'unknown'}`);
+    }
+  }
+
+  if (payload.tracker?.planningMode === 'tracker-native') {
+    lines.push('', 'Tracker Work');
+    if (!payload.tracker.ok) {
+      lines.push('- tracker unavailable');
+    } else if (!payload.tracker.items || payload.tracker.items.length === 0) {
+      lines.push('- no open tracker issues found');
+    } else {
+      for (const item of payload.tracker.items.slice(0, 5)) {
+        const tags = [];
+        if (item.riperState) tags.push(item.riperState);
+        if (item.block) tags.push(item.block);
+        lines.push(`- #${item.number} ${item.title} [${tags.join(', ') || 'no tracker fields'}]`);
+      }
     }
   }
 
@@ -660,6 +748,7 @@ function buildPayload(rawOptions, cwd = process.cwd()) {
   const mergedPlans = sortPlans(dedupePlans([...filesystemPlans, ...trackedPlans]), current);
   const unfinished = mergedPlans.filter((plan) => plan.unfinished).slice(0, options.planLimit);
   const selectedPlanHint = resolveSelectedPlanHint(root, options, filesystemPlans);
+  const tracker = loadTrackerStatus(root, options, warnings);
 
   const payload = {
     generatedAt: new Date().toISOString(),
@@ -670,6 +759,7 @@ function buildPayload(rawOptions, cwd = process.cwd()) {
       commitsPerBranch: options.commitsPerBranch,
       planLimit: options.planLimit,
       maxPlanRefs: options.maxPlanRefs,
+      trackerLimit: options.trackerLimit,
       since: options.since,
       cwd: options.cwd,
       selectedPlan: options.selectedPlan,
@@ -690,6 +780,7 @@ function buildPayload(rawOptions, cwd = process.cwd()) {
       unfinished,
       total: mergedPlans.length,
     },
+    tracker,
     selectedPlanHint,
     warnings,
   };

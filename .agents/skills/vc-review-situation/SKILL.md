@@ -17,7 +17,9 @@ metadata:
 Summarize the current repo state for handoff and resume work.
 
 If `/.vc-project.json` sets `planning.mode` to `tracker-native`, treat repo-local plans as
-compatibility hints only unless the project explicitly uses a repo-local execution contract.
+compatibility hints only unless the project explicitly uses a repo-local execution contract. In that
+mode, the scanner should consult the tracker adapter first and use repo-local plan inventory only as
+supporting evidence.
 
 This is a helper skill only.
 
@@ -90,6 +92,7 @@ node .claude/skills/vc-review-situation/scripts/review-situation-scan.cjs --json
 node .claude/skills/vc-review-situation/scripts/review-situation-scan.cjs --selected-plan process/general-plans/active/example_27-05-26/example_PLAN_27-05-26.md
 node .claude/skills/vc-review-situation/scripts/review-situation-scan.cjs --since "14 days ago"
 node .claude/skills/vc-review-situation/scripts/review-situation-scan.cjs --fetch
+node .claude/skills/vc-review-situation/scripts/review-situation-scan.cjs --tracker-mock /tmp/tracker.json
 ```
 
 ## Input Sources
@@ -101,6 +104,7 @@ The scanner reads from:
 - local and remote branch refs plus sampled recent commits
 - `process/general-plans/active/` (plans inside `{slug}_{date}/` task subfolders — scan one level deep; compatibility surface in `tracker-native` mode unless a repo-local execution contract is in use)
 - `process/features/*/active/` (same depth)
+- `scripts/vc-tracker-github.mjs status --json` when `planning.mode=tracker-native` and `tracker.provider=github`
 - optional session-state hints if a local session id is present
 
 It does not scan upstream `plans/**`, and it never treats a selected-plan hint as execute authority.

@@ -238,7 +238,8 @@ test('task-folder convention plan is detected as primary plan', () => {
     const payload = buildPayload({ fetch: false, planLimit: 10, maxPlanRefs: 20 }, repo);
     const allPlanPaths = [
       ...payload.plans.unfinished,
-      ...payload.plans.finished,
+      ...payload.plans.filesystem,
+      ...payload.plans.tracked,
     ].map((p) => p.path);
 
     assert.ok(
@@ -264,5 +265,86 @@ test('detached HEAD still produces a useful text report', () => {
     assert.match(text, /Warnings/);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test('tracker-native review includes tracker work and suppresses local-plan absence warning', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'review-situation-tracker-native-'));
+  const repo = path.join(root, 'repo');
+  fs.mkdirSync(repo);
+  git(repo, ['init']);
+  git(repo, ['config', 'user.email', 'test@example.com']);
+  git(repo, ['config', 'user.name', 'Test User']);
+  git(repo, ['checkout', '-b', 'main']);
+  writeFile(path.join(repo, 'README.md'), '# fixture\n');
+  writeFile(path.join(repo, '.vc-project.json'), JSON.stringify({
+    planning: {
+      mode: 'tracker-native',
+      repoExecutionContracts: 'allowed',
+      repoBacklog: 'compatibility-only',
+    },
+    tracker: {
+      mode: 'external',
+      provider: 'github',
+      owner: 'acme',
+      repository: 'demo',
+      projectNumber: '7',
+      phaseField: 'Block',
+      riperField: 'RIPER State',
+    },
+  }, null, 2));
+  writeFile(path.join(repo, 'tracker-mock.json'), JSON.stringify({
+    statusQuery: {
+      repository: {
+        issues: {
+          nodes: [
+            {
+              id: 'I_1',
+              number: 201,
+              title: 'Tracker-native tranche',
+              url: 'https://github.com/acme/demo/issues/201',
+              state: 'OPEN',
+              updatedAt: '2026-08-11T10:00:00Z',
+              labels: { nodes: [] },
+              assignees: { nodes: [] },
+              projectItems: {
+                nodes: [
+                  {
+                    id: 'PVTI_1',
+                    project: { id: 'P_1', number: 7, title: 'Main Board' },
+                    fieldValues: {
+                      nodes: [
+                        { field: { name: 'Block' }, name: 'Foundation', optionId: 'opt-block-1' },
+                        { field: { name: 'RIPER State' }, name: 'Execute', optionId: 'opt-riper-execute' },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    },
+  }, null, 2));
+  fs.mkdirSync(path.join(repo, 'scripts'), { recursive: true });
+  fs.copyFileSync(
+    path.join(process.cwd(), 'scripts', 'vc-tracker-github.mjs'),
+    path.join(repo, 'scripts', 'vc-tracker-github.mjs'),
+  );
+  git(repo, ['add', '.']);
+  git(repo, ['commit', '-m', 'initial commit']);
+
+  try {
+    const payload = buildPayload({ fetch: false, trackerMock: path.join(repo, 'tracker-mock.json') }, repo);
+    const text = renderText(payload);
+
+    assert.equal(payload.tracker.ok, true);
+    assert.equal(payload.tracker.next.number, 201);
+    assert.equal(payload.warnings.some((warning) => warning.includes('No active plan files were found')), false);
+    assert.match(text, /Tracker Work/);
+    assert.match(text, /#201 Tracker-native tranche/);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
   }
 });
